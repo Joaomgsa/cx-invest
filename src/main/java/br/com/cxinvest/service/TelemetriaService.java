@@ -20,11 +20,16 @@ public class TelemetriaService {
 
     @Transactional
     public void registrar(String nomeServico, long tempoRespostaMs) {
-        Telemetria telemetria = new Telemetria();
-        telemetria.setNomeServico(nomeServico);
-        telemetria.setTimestamp(LocalDateTime.now());
-        telemetria.setTempoRespostaMs(tempoRespostaMs);
-        telemetriaRepository.persist(telemetria);
+        try {
+            Telemetria telemetria = new Telemetria();
+            telemetria.setNomeServico(nomeServico);
+            telemetria.setTimestamp(LocalDateTime.now());
+            telemetria.setTempoRespostaMs(tempoRespostaMs);
+            telemetriaRepository.persist(telemetria);
+        } catch (Exception e) {
+            // Log but don't fail the request if telemetry fails
+            System.err.println("Erro ao registrar telemetria: " + e.getMessage());
+        }
     }
 
     public TelemetriaResponse obterEstatisticas() {
