@@ -2,12 +2,12 @@ package br.com.cxinvest.entity;
 
 import jakarta.persistence.*;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "tb_clientes")
-public class Cliente extends PanacheEntityBase {
+@Table(name = "tb_perfil_investimento")
+public class Perfil extends PanacheEntityBase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
@@ -16,13 +16,13 @@ public class Cliente extends PanacheEntityBase {
     @Column(nullable = false)
     public String nome;
 
-    @NotBlank
-    @Email
-    @Column(nullable = false, unique = true)
-    public String email;
+    @NotNull
+    @Column(nullable = false)
+    public Integer pontuacao;
 
-    @ManyToOne
-    @JoinColumn(name = "perfil_id", nullable = false)
-    public Perfil perfilInvestimento;
+    @Column(length = 1000)
+    public String descricao;
 
+    // getters/setters opcionais
 }
+

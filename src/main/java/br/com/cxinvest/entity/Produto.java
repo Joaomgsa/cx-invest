@@ -23,16 +23,9 @@ public class Produto extends PanacheEntityBase {
     @Column(name = "rentabilidade_mensal", nullable = false)
     public BigDecimal rentabilidadeMensal;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "classe_risco", nullable = false)
-    public ClasseRisco classeRisco;
-
-    public enum ClasseRisco {
-        CONSERVADOR,
-        MODERADO,
-        AGRESSIVO
-    }
+    @ManyToOne
+    @JoinColumn(name = "perfil_id", nullable = false)
+    public Perfil perfilInvestimento;
 
     // getters/setters opcionais
 }
-

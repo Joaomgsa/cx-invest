@@ -1,6 +1,8 @@
 package br.com.cxinvest.service;
 
+import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
+import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.repository.ProdutoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,11 +18,15 @@ public class ProdutoService {
     @Inject
     ProdutoRepository repository;
 
+    @Inject
+    PerfilRepository perfilRepository;
+
     // Construtor para facilitar testes unitários
     public ProdutoService() {}
 
-    public ProdutoService(ProdutoRepository repository) {
+    public ProdutoService(ProdutoRepository repository, PerfilRepository perfilRepository) {
         this.repository = repository;
+        this.perfilRepository = perfilRepository;
     }
 
     public List<Produto> listarTodos() {
@@ -33,6 +39,14 @@ public class ProdutoService {
 
     @Transactional
     public Produto criar(Produto produto) {
+        if (produto.perfilInvestimento == null || produto.perfilInvestimento.id == null) {
+            throw new IllegalArgumentException("perfilId é obrigatório");
+        }
+        Optional<Perfil> perfilOpt = perfilRepository.findByIdOptional(produto.perfilInvestimento.id);
+        if (perfilOpt.isEmpty()) {
+            throw new NotFoundException("Perfil não encontrado: " + produto.perfilInvestimento.id);
+        }
+        produto.perfilInvestimento = perfilOpt.get();
         repository.persistProduto(produto);
         return produto;
     }
@@ -47,7 +61,14 @@ public class ProdutoService {
         existente.nome = produtoAtualizado.nome;
         existente.tipo = produtoAtualizado.tipo;
         existente.rentabilidadeMensal = produtoAtualizado.rentabilidadeMensal;
-        existente.classeRisco = produtoAtualizado.classeRisco;
+        if (produtoAtualizado.perfilInvestimento == null || produtoAtualizado.perfilInvestimento.id == null) {
+            throw new IllegalArgumentException("perfilId é obrigatório");
+        }
+        Optional<Perfil> perfilOpt = perfilRepository.findByIdOptional(produtoAtualizado.perfilInvestimento.id);
+        if (perfilOpt.isEmpty()) {
+            throw new NotFoundException("Perfil não encontrado: " + produtoAtualizado.perfilInvestimento.id);
+        }
+        existente.perfilInvestimento = perfilOpt.get();
         repository.persist(existente);
         return existente;
     }

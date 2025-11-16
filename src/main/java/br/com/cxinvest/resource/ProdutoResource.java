@@ -2,6 +2,7 @@ package br.com.cxinvest.resource;
 
 import br.com.cxinvest.dto.ProdutoRequest;
 import br.com.cxinvest.dto.ProdutoResponse;
+import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.service.ProdutoService;
 import jakarta.inject.Inject;
@@ -55,7 +56,9 @@ public class ProdutoResource {
     }
 
     private ProdutoResponse toResponse(Produto p) {
-        return new ProdutoResponse(p.id, p.nome, p.tipo, p.rentabilidadeMensal, p.classeRisco);
+        Long perfilId = p.perfilInvestimento != null ? p.perfilInvestimento.id : null;
+        String perfilNome = p.perfilInvestimento != null ? p.perfilInvestimento.nome : null;
+        return new ProdutoResponse(p.id, p.nome, p.tipo, p.rentabilidadeMensal, perfilId, perfilNome);
     }
 
     private Produto toEntity(ProdutoRequest r) {
@@ -63,8 +66,9 @@ public class ProdutoResource {
         p.nome = r.nome();
         p.tipo = r.tipo();
         p.rentabilidadeMensal = r.rentabilidadeMensal();
-        p.classeRisco = r.classeRisco();
+        Perfil perfil = new Perfil();
+        perfil.id = r.perfilId();
+        p.perfilInvestimento = perfil;
         return p;
     }
 }
-

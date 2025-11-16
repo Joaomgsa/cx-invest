@@ -1,15 +1,18 @@
 package br.com.cxinvest.service;
 
+import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
+import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.repository.ProdutoRepository;
 import jakarta.ws.rs.NotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.Closeable;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,12 +24,24 @@ public class ProdutoServiceTest {
     @Mock
     ProdutoRepository repository;
 
+    @Mock
+    PerfilRepository perfilRepository;
+
     ProdutoService service;
+
+    private AutoCloseable closeable;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        service = new ProdutoService(repository);
+        closeable = MockitoAnnotations.openMocks(this);
+        service = new ProdutoService(repository, perfilRepository);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        if (closeable != null) {
+            closeable.close();
+        }
     }
 
     @Test
@@ -35,15 +50,21 @@ public class ProdutoServiceTest {
         p.nome = "CDB Test";
         p.tipo = "CDB";
         p.rentabilidadeMensal = new BigDecimal("0.12");
-        p.classeRisco = Produto.ClasseRisco.CONSERVADOR;
+        Perfil perfil = new Perfil();
+        perfil.id = 1L;
+        perfil.nome = "CONSERVADOR";
+        perfil.pontuacao = 10;
+        p.perfilInvestimento = perfil;
 
+        when(perfilRepository.findByIdOptional(1L)).thenReturn(Optional.of(perfil));
         when(repository.persistProduto(any())).thenAnswer(inv -> inv.getArgument(0));
 
         Produto criado = service.criar(p);
 
         verify(repository, times(1)).persistProduto(p);
         assertEquals("CDB Test", criado.nome);
-        assertEquals(Produto.ClasseRisco.CONSERVADOR, criado.classeRisco);
+        assertNotNull(criado.perfilInvestimento);
+        assertEquals(1L, criado.perfilInvestimento.id);
     }
 
     @Test
@@ -53,21 +74,31 @@ public class ProdutoServiceTest {
         existente.nome = "Old";
         existente.tipo = "CDB";
         existente.rentabilidadeMensal = new BigDecimal("0.05");
-        existente.classeRisco = Produto.ClasseRisco.MODERADO;
+        Perfil perfilExistente = new Perfil();
+        perfilExistente.id = 2L;
+        perfilExistente.nome = "MODERADO";
+        perfilExistente.pontuacao = 50;
+        existente.perfilInvestimento = perfilExistente;
 
         Produto atualizado = new Produto();
         atualizado.nome = "New";
         atualizado.tipo = "CDB";
         atualizado.rentabilidadeMensal = new BigDecimal("0.20");
-        atualizado.classeRisco = Produto.ClasseRisco.AGRESSIVO;
+        Perfil perfilNovo = new Perfil();
+        perfilNovo.id = 3L;
+        perfilNovo.nome = "AGRESSIVO";
+        perfilNovo.pontuacao = 90;
+        atualizado.perfilInvestimento = perfilNovo;
 
         when(repository.findByIdOptional(1L)).thenReturn(Optional.of(existente));
+        when(perfilRepository.findByIdOptional(3L)).thenReturn(Optional.of(perfilNovo));
 
         Produto result = service.atualizar(1L, atualizado);
 
         assertEquals("New", result.nome);
         assertEquals(new BigDecimal("0.20"), result.rentabilidadeMensal);
-        assertEquals(Produto.ClasseRisco.AGRESSIVO, result.classeRisco);
+        assertNotNull(result.perfilInvestimento);
+        assertEquals(3L, result.perfilInvestimento.id);
     }
 
     @Test
@@ -82,4 +113,3 @@ public class ProdutoServiceTest {
         assertThrows(NotFoundException.class, () -> service.remover(99L));
     }
 }
-

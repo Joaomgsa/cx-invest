@@ -1,13 +1,11 @@
 package br.com.cxinvest.dto;
 
-import java.math.BigDecimal;
-
-public record ProdutoResponse(
+public record ClienteResponse(
         Long id,
         String nome,
-        String tipo,
-        BigDecimal rentabilidadeMensal,
+        String email,
         Long perfilId,
         String perfilNome
 ) {
 }
+

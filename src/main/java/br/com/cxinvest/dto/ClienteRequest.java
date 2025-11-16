@@ -1,13 +1,13 @@
 package br.com.cxinvest.dto;
 
-import java.math.BigDecimal;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record ProdutoRequest(
+public record ClienteRequest(
         @NotBlank String nome,
-        @NotBlank String tipo,
-        @NotNull BigDecimal rentabilidadeMensal,
+        @NotBlank @Email String email,
         @NotNull Long perfilId
 ) {
 }
+
