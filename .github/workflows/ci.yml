@@ -1,25 +1,54 @@
-## A basic GitHub Actions workflow for your Quarkus application.
-
-name: CI build
+# language: yaml
+# File: .github/workflows/ci.yml
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - prd
+      - main
+      - desenv
   pull_request:
-    branches: [ main ]
+    branches:
+      - prd
+      - main
+      - desenv
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [21]
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: ${{ matrix.java }}
           distribution: temurin
-          cache: maven
+          cache: 'maven'
 
-      - name: Build
-        run: ./mvnw verify -B
+      - name: Cache .m2 (fallback)
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Build and run tests
+        run: mvn -B -V clean verify
+
+      - name: Upload test reports (JUnit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: target/surefire-reports
