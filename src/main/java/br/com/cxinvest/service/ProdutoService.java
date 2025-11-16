@@ -1,0 +1,63 @@
+package br.com.cxinvest.service;
+
+import br.com.cxinvest.entity.Produto;
+import br.com.cxinvest.repository.ProdutoRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
+import java.util.Optional;
+
+@ApplicationScoped
+public class ProdutoService {
+
+    @Inject
+    ProdutoRepository repository;
+
+    // Construtor para facilitar testes unitários
+    public ProdutoService() {}
+
+    public ProdutoService(ProdutoRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<Produto> listarTodos() {
+        return repository.listAllProdutos();
+    }
+
+    public Optional<Produto> buscarPorId(Long id) {
+        return repository.findByIdOptional(id);
+    }
+
+    @Transactional
+    public Produto criar(Produto produto) {
+        repository.persistProduto(produto);
+        return produto;
+    }
+
+    @Transactional
+    public Produto atualizar(Long id, Produto produtoAtualizado) {
+        Optional<Produto> existenteOpt = repository.findByIdOptional(id);
+        if (existenteOpt.isEmpty()) {
+            throw new NotFoundException("Produto não encontrado: " + id);
+        }
+        Produto existente = existenteOpt.get();
+        existente.nome = produtoAtualizado.nome;
+        existente.tipo = produtoAtualizado.tipo;
+        existente.rentabilidadeMensal = produtoAtualizado.rentabilidadeMensal;
+        existente.classeRisco = produtoAtualizado.classeRisco;
+        repository.persist(existente);
+        return existente;
+    }
+
+    @Transactional
+    public void remover(Long id) {
+        Optional<Produto> existenteOpt = repository.findByIdOptional(id);
+        if (existenteOpt.isEmpty()) {
+            throw new NotFoundException("Produto não encontrado: " + id);
+        }
+        repository.removeById(id);
+    }
+}

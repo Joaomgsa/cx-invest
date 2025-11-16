@@ -164,3 +164,18 @@ Easily start your REST Web Services
 Easily start your RESTful Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+
+## Instruções rápidas (JDK 21)
+
+Esta aplicação foi ajustada para Java 21. Para executar localmente:
+
+- Instale o JDK 21 e aponte JAVA_HOME para ele.
+- Verifique versões:
+  - mvn -v
+  - java -version
+- Em dev (live coding):
+  - ./mvnw quarkus:dev
+- Para empacotar:
+  - ./mvnw package
+
+Se preferir, utilize a variável de ambiente JAVA_HOME apontando para o JDK 21 ao executar os comandos acima.
