@@ -10,4 +10,12 @@ public enum PreferenciaInvestimento {
             case RENTABILIDADE -> "Rentabilidade";
         };
     }
+
+
+    public int weight() {
+        return switch (this) {
+            case RENTABILIDADE -> 2;
+            case LIQUIDEZ -> 0;
+        };
+    }
 }

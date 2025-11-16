@@ -2,6 +2,8 @@ package br.com.cxinvest.service;
 
 import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.repository.PerfilRepository;
+import br.com.cxinvest.entity.Enum.FrequenciaInvestimento;
+import br.com.cxinvest.entity.Enum.PreferenciaInvestimento;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -9,6 +11,7 @@ import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @ApplicationScoped
 public class PerfilService {
@@ -52,5 +55,32 @@ public class PerfilService {
         }
         repository.removeById(id);
     }
-}
 
+
+    public Perfil definirPerfilCliente(BigDecimal totalInvestido, FrequenciaInvestimento frequencia, PreferenciaInvestimento preferencia) {
+        final var tv = (totalInvestido == null) ? BigDecimal.ZERO : totalInvestido;
+
+        // calcular peso do totalInvestido usando lista ordenada de thresholds
+        record Threshold(BigDecimal limite, int weight) {}
+        var thresholds = List.of(
+                new Threshold(new BigDecimal("3000"), 2),
+                new Threshold(new BigDecimal("1000"), 1)
+        );
+
+        int totalInvestidoWeight = thresholds.stream()
+                .filter(t -> tv.compareTo(t.limite()) >= 0)
+                .mapToInt(Threshold::weight)
+                .findFirst()
+                .orElse(0);
+
+        int freqWeight = (frequencia == null ? FrequenciaInvestimento.MEDIA : frequencia).weight();
+        int prefWeight = (preferencia == null ? PreferenciaInvestimento.LIQUIDEZ : preferencia).weight();
+
+        int score = totalInvestidoWeight + freqWeight + prefWeight;
+
+        String perfilNome = score <= 1 ? "CONSERVADOR" : score <= 3 ? "MODERADO" : "AGRESSIVO";
+
+        Optional<Perfil> perfilOpt = repository.find("nome", perfilNome).firstResultOptional();
+        return perfilOpt.orElseThrow(() -> new NotFoundException("Perfil não encontrado: " + perfilNome));
+    }
+}

@@ -1,15 +1,17 @@
 package br.com.cxinvest.service;
 
 import br.com.cxinvest.entity.Cliente;
-import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.repository.ClienteRepository;
 import br.com.cxinvest.repository.PerfilRepository;
+import br.com.cxinvest.entity.Enum.FrequenciaInvestimento;
+import br.com.cxinvest.entity.Enum.PreferenciaInvestimento;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 
 @ApplicationScoped
 public class ClienteService {
@@ -20,12 +22,11 @@ public class ClienteService {
     @Inject
     PerfilRepository perfilRepository;
 
-    public ClienteService() {}
+    @Inject
+    PerfilService perfilService;
 
-    public ClienteService(ClienteRepository repository, PerfilRepository perfilRepository) {
-        this.repository = repository;
-        this.perfilRepository = perfilRepository;
-    }
+    @Inject
+    ClientePerfilService clientePerfilService;
 
     public List<Cliente> listarTodos() {
         return repository.listAllClientes();
@@ -37,25 +38,28 @@ public class ClienteService {
 
     @Transactional
     public Cliente criar(Cliente cliente) {
-        if (cliente.perfilInvestimento == null || cliente.perfilInvestimento.id == null) {
-            throw new IllegalArgumentException("perfilId é obrigatório");
-        }
-        Optional<Perfil> perfilOpt = perfilRepository.findByIdOptional(cliente.perfilInvestimento.id);
-        if (perfilOpt.isEmpty()) {
-            throw new NotFoundException("Perfil não encontrado: " + cliente.perfilInvestimento.id);
-        }
-        cliente.perfilInvestimento = perfilOpt.get();
-        // garantir campos adicionais
-        if (cliente.totalInvestido == null) {
-            cliente.totalInvestido = java.math.BigDecimal.ZERO;
-        }
-        if (cliente.frequenciaInvestimento == null) {
-            cliente.frequenciaInvestimento = br.com.cxinvest.entity.Enum.FrequenciaInvestimento.MEDIA;
-        }
-        if (cliente.preferenciaInvestimento == null) {
-            cliente.preferenciaInvestimento = br.com.cxinvest.entity.Enum.PreferenciaInvestimento.LIQUIDEZ;
-        }
+
+        var total = Optional.ofNullable(cliente.totalInvestido).orElse(java.math.BigDecimal.ZERO);
+        var frequencia = Optional.ofNullable(cliente.frequenciaInvestimento).orElse(FrequenciaInvestimento.MEDIA);
+        var preferencia = Optional.ofNullable(cliente.preferenciaInvestimento).orElse(PreferenciaInvestimento.LIQUIDEZ);
+
+        cliente.totalInvestido = total;
+        cliente.frequenciaInvestimento = frequencia;
+        cliente.preferenciaInvestimento = preferencia;
+
+        // resolver/validar perfil: se perfil informado, buscar no repo; senão calcular.
+        cliente.perfilInvestimento = Optional.ofNullable(cliente.perfilInvestimento)
+                .map(p -> Optional.ofNullable(p.id)
+                        .flatMap(perfilRepository::findByIdOptional)
+                        .orElseThrow(() -> new NotFoundException("Perfil não encontrado: " + p.id)))
+                .orElseGet(() -> perfilService.definirPerfilCliente(total, frequencia, preferencia));
+
+
         repository.persistCliente(cliente);
+
+
+        clientePerfilService.aplicarDecisaoDePerfil(cliente, cliente.perfilInvestimento, "Criação de cliente", null);
+
         return cliente;
     }
 
@@ -65,20 +69,31 @@ public class ClienteService {
         if (existente == null) {
             throw new NotFoundException("Cliente não encontrado: " + id);
         }
-        existente.nome = clienteAtualizado.nome;
-        existente.email = clienteAtualizado.email;
-        existente.totalInvestido = clienteAtualizado.totalInvestido != null ? clienteAtualizado.totalInvestido : existente.totalInvestido;
-        existente.frequenciaInvestimento = clienteAtualizado.frequenciaInvestimento != null ? clienteAtualizado.frequenciaInvestimento : existente.frequenciaInvestimento;
-        existente.preferenciaInvestimento = clienteAtualizado.preferenciaInvestimento != null ? clienteAtualizado.preferenciaInvestimento : existente.preferenciaInvestimento;
-        if (clienteAtualizado.perfilInvestimento == null || clienteAtualizado.perfilInvestimento.id == null) {
-            throw new IllegalArgumentException("perfilId é obrigatório");
+
+        // Atualiza apenas campos presentes (evita múltiplos ifs)
+        Optional.ofNullable(clienteAtualizado.nome).ifPresent(n -> existente.nome = n);
+        Optional.ofNullable(clienteAtualizado.email).ifPresent(e -> existente.email = e);
+        Optional.ofNullable(clienteAtualizado.totalInvestido).ifPresent(t -> existente.totalInvestido = t);
+        Optional.ofNullable(clienteAtualizado.frequenciaInvestimento).ifPresent(f -> existente.frequenciaInvestimento = f);
+        Optional.ofNullable(clienteAtualizado.preferenciaInvestimento).ifPresent(p -> existente.preferenciaInvestimento = p);
+
+
+        var novoPerfil = Optional.ofNullable(clienteAtualizado.perfilInvestimento)
+                .map(p -> Optional.ofNullable(p.id)
+                        .flatMap(perfilRepository::findByIdOptional)
+                        .orElseThrow(() -> new NotFoundException("Perfil não encontrado: " + p.id)))
+                .orElseGet(() -> perfilService.definirPerfilCliente(existente.totalInvestido, existente.frequenciaInvestimento, existente.preferenciaInvestimento));
+
+        var existentePerfilId = Optional.ofNullable(existente.perfilInvestimento).map(p -> p.id).orElse(null);
+        var novoPerfilId = Optional.ofNullable(novoPerfil).map(p -> p.id).orElse(null);
+
+        // Se o perfil mudou, registrar histórico e atualizar; caso contrário apenas persistir
+        if (!Objects.equals(existentePerfilId, novoPerfilId)) {
+            clientePerfilService.aplicarDecisaoDePerfil(existente, novoPerfil, "Atualização de perfil via API", null);
+        } else {
+            repository.persist(existente);
         }
-        Optional<Perfil> perfilOpt = perfilRepository.findByIdOptional(clienteAtualizado.perfilInvestimento.id);
-        if (perfilOpt.isEmpty()) {
-            throw new NotFoundException("Perfil não encontrado: " + clienteAtualizado.perfilInvestimento.id);
-        }
-        existente.perfilInvestimento = perfilOpt.get();
-        repository.persist(existente);
+
         return existente;
     }
 

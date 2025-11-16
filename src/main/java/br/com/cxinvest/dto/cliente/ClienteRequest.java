@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 public record ClienteRequest(
         @NotBlank String nome,
         @NotBlank @Email String email,
-        @NotNull Long perfilId,
+        Long perfilId,
         @NotNull BigDecimal totalInvestido,
         @NotNull FrequenciaInvestimento frequenciaInvestimento,
         @NotNull PreferenciaInvestimento preferenciaInvestimento

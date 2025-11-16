@@ -54,3 +54,18 @@ INSERT INTO tb_produtos (id, nome, tipo, rentabilidade_mensal, perfil_id) VALUES
 INSERT INTO tb_produtos (id, nome, tipo, rentabilidade_mensal, perfil_id) VALUES (6, 'Fundo Multimercado', 'Fundo', 0.15, 2);
 INSERT INTO tb_produtos (id, nome, tipo, rentabilidade_mensal, perfil_id) VALUES (7, 'CDB Premium', 'CDB', 0.14, 2);
 INSERT INTO tb_produtos (id, nome, tipo, rentabilidade_mensal, perfil_id) VALUES (8, 'Tesouro IPCA+', 'Tesouro Direto', 0.13, 2);
+
+-- Criação da tabela de histórico de perfil do cliente
+CREATE TABLE IF NOT EXISTS tb_cliente_perfil_historico (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cliente_id INTEGER NOT NULL,
+  perfil_anterior_id INTEGER,
+  perfil_novo_id INTEGER NOT NULL,
+  criadoEm TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  motivo VARCHAR(1000),
+  metadados TEXT,
+  pontuacaoNoMomento INTEGER,
+  FOREIGN KEY (cliente_id) REFERENCES tb_clientes(id),
+  FOREIGN KEY (perfil_anterior_id) REFERENCES tb_perfil_investimento(id),
+  FOREIGN KEY (perfil_novo_id) REFERENCES tb_perfil_investimento(id)
+);
