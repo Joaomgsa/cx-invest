@@ -45,6 +45,16 @@ public class ClienteService {
             throw new NotFoundException("Perfil não encontrado: " + cliente.perfilInvestimento.id);
         }
         cliente.perfilInvestimento = perfilOpt.get();
+        // garantir campos adicionais
+        if (cliente.totalInvestido == null) {
+            cliente.totalInvestido = java.math.BigDecimal.ZERO;
+        }
+        if (cliente.frequenciaInvestimento == null) {
+            cliente.frequenciaInvestimento = br.com.cxinvest.entity.Enum.FrequenciaInvestimento.MEDIA;
+        }
+        if (cliente.preferenciaInvestimento == null) {
+            cliente.preferenciaInvestimento = br.com.cxinvest.entity.Enum.PreferenciaInvestimento.LIQUIDEZ;
+        }
         repository.persistCliente(cliente);
         return cliente;
     }
@@ -57,6 +67,9 @@ public class ClienteService {
         }
         existente.nome = clienteAtualizado.nome;
         existente.email = clienteAtualizado.email;
+        existente.totalInvestido = clienteAtualizado.totalInvestido != null ? clienteAtualizado.totalInvestido : existente.totalInvestido;
+        existente.frequenciaInvestimento = clienteAtualizado.frequenciaInvestimento != null ? clienteAtualizado.frequenciaInvestimento : existente.frequenciaInvestimento;
+        existente.preferenciaInvestimento = clienteAtualizado.preferenciaInvestimento != null ? clienteAtualizado.preferenciaInvestimento : existente.preferenciaInvestimento;
         if (clienteAtualizado.perfilInvestimento == null || clienteAtualizado.perfilInvestimento.id == null) {
             throw new IllegalArgumentException("perfilId é obrigatório");
         }

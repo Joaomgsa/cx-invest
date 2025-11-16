@@ -23,6 +23,6 @@ public class Perfil extends PanacheEntityBase {
     @Column(length = 1000)
     public String descricao;
 
-    // getters/setters opcionais
+
 }
 
