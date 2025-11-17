@@ -4,6 +4,8 @@ import br.com.cxinvest.dto.simulacao.SimulacaoHistoricoResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoProdutoDiaResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoRequest;
 import br.com.cxinvest.dto.simulacao.SimulacaoResponse;
+import br.com.cxinvest.dto.simulacao.SimulacaoProdutoResponse;
+import br.com.cxinvest.dto.simulacao.SimulacaoResultadoResponse;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.entity.Simulacao;
 import br.com.cxinvest.repository.SimulacaoRepository;
@@ -20,6 +22,7 @@ import java.util.Objects;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.Instant;
 
 @ApplicationScoped
 public class SimulacaoServiceImpl implements SimulacaoService {
@@ -89,15 +92,24 @@ public class SimulacaoServiceImpl implements SimulacaoService {
 
         repository.salvarSimulacao(simulacao);
 
-        return new SimulacaoResponse(
+        // montar DTOs de resposta
+        var produtoDto = new SimulacaoProdutoResponse(
                 produto.id,
                 produto.nome,
-                cliente.id,
-                simulacao.valorSimulacao,
-                simulacao.valorFinal,
-                simulacao.prazoMeses,
-                simulacao.rentabilidadeEfetiva
+                produto.tipo,
+                produto.rentabilidadeMensal,
+                determinarRisco(produto.perfilInvestimento)
         );
+
+        var resultadoDto = new SimulacaoResultadoResponse(
+                simulacao.valorFinal,
+                simulacao.rentabilidadeEfetiva,
+                simulacao.prazoMeses
+        );
+
+        String data = Instant.now().toString();
+
+        return new SimulacaoResponse(produtoDto, resultadoDto, data);
     }
 
     /*
@@ -189,5 +201,22 @@ public class SimulacaoServiceImpl implements SimulacaoService {
         BigDecimal fator = base.pow(meses, mc);
         BigDecimal resultado = valorSimulacao.multiply(fator, mc);
         return resultado.setScale(2, RoundingMode.HALF_EVEN);
+    }
+
+    /**
+     * Mapeia o perfil para um rótulo de risco (Baixo/Médio/Alto) ou retorna o nome do perfil quando desconhecido.
+     * TODO: Verificar pq produto tem perfil de risco e ver se conflita com perfil de investimento
+     */
+    public String determinarRisco(br.com.cxinvest.entity.Perfil perfil) {
+        String risco = "Desconhecido";
+        if (perfil != null && perfil.nome != null) {
+            switch (perfil.nome.toUpperCase()) {
+                case "CONSERVADOR" -> risco = "Baixo";
+                case "MODERADO" -> risco = "Médio";
+                case "AGRESSIVO" -> risco = "Alto";
+                default -> risco = perfil.nome;
+            }
+        }
+        return risco;
     }
 }

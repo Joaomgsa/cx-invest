@@ -2,14 +2,13 @@ package br.com.cxinvest.resource;
 
 import br.com.cxinvest.dto.simulacao.SimulacaoHistoricoResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoProdutoDiaResponse;
+import br.com.cxinvest.dto.simulacao.SimulacaoRequest;
 import br.com.cxinvest.service.SimulacaoService;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.DefaultValue;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
@@ -49,5 +48,10 @@ public class SimulacaoResource {
         return simulacaoService.historico(page, size);
     }
 
+    @POST
+    @Path("/simular")
+    public Response simular(@Valid SimulacaoRequest req) {
+        return Response.ok(simulacaoService.simular(req)).build();
+    }
 
 }

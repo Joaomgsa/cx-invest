@@ -10,3 +10,4 @@ public record SimulacaoProdutoResponse(
         String risco
 ) {
 }
+
