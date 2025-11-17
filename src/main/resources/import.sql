@@ -69,3 +69,29 @@ CREATE TABLE IF NOT EXISTS tb_cliente_perfil_historico (
   FOREIGN KEY (perfil_anterior_id) REFERENCES tb_perfil_investimento(id),
   FOREIGN KEY (perfil_novo_id) REFERENCES tb_perfil_investimento(id)
 );
+
+-- Tabela de simulações (correspondente à entidade Simulacao)
+CREATE TABLE IF NOT EXISTS tb_simulacoes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  produto_id INTEGER NOT NULL,
+  cliente_id INTEGER NOT NULL,
+  rentabilidade_efetiva NUMERIC NOT NULL,
+  valor_final NUMERIC NOT NULL,
+  prazo_meses INTEGER NOT NULL,
+  data_simulacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (produto_id) REFERENCES tb_produtos(id),
+  FOREIGN KEY (cliente_id) REFERENCES tb_clientes(id)
+);
+
+-- Registros de exemplo em tb_simulacoes (compatíveis com a entidade Simulacao)
+INSERT INTO tb_simulacoes (produto_id, cliente_id, rentabilidade_efetiva, valor_final, prazo_meses, data_simulacao) VALUES (1, 1, 0.08, 1100.50, 12, '2025-11-16T10:00:00Z');
+INSERT INTO tb_simulacoes (produto_id, cliente_id, rentabilidade_efetiva, valor_final, prazo_meses, data_simulacao) VALUES (1, 2, 0.08, 1200.00, 12, '2025-11-16T15:30:00Z');
+INSERT INTO tb_simulacoes (produto_id, cliente_id, rentabilidade_efetiva, valor_final, prazo_meses, data_simulacao) VALUES (1, 3, 0.075, 1050.75, 6, '2025-11-15T09:20:00Z');
+
+INSERT INTO tb_simulacoes (produto_id, cliente_id, rentabilidade_efetiva, valor_final, prazo_meses, data_simulacao) VALUES (2, 4, 0.06, 1000.00, 12, '2025-11-16T11:00:00Z');
+INSERT INTO tb_simulacoes (produto_id, cliente_id, rentabilidade_efetiva, valor_final, prazo_meses, data_simulacao) VALUES (2, 5, 0.062, 1025.00, 12, '2025-11-16T12:45:00Z');
+
+INSERT INTO tb_simulacoes (produto_id, cliente_id, rentabilidade_efetiva, valor_final, prazo_meses, data_simulacao) VALUES (5, 6, 0.18, 2500.00, 24, '2025-11-16T08:00:00Z');
+INSERT INTO tb_simulacoes (produto_id, cliente_id, rentabilidade_efetiva, valor_final, prazo_meses, data_simulacao) VALUES (5, 7, 0.177, 2400.00, 24, '2025-11-15T14:10:00Z');
+
+INSERT INTO tb_simulacoes (produto_id, cliente_id, rentabilidade_efetiva, valor_final, prazo_meses, data_simulacao) VALUES (8, 8, 0.13, 1300.00, 36, '2025-11-16T16:00:00Z');

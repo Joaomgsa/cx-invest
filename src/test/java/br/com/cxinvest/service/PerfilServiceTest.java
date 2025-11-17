@@ -54,7 +54,7 @@ public class PerfilServiceTest {
         expected.nome = "CONSERVADOR";
         expected.pontuacao = 10;
 
-        when(repository.find(eq("nome"), eq("CONSERVADOR"))).thenReturn(query);
+        when(repository.find(eq("nome"), (Object[]) any())).thenReturn(query);
         when(query.firstResultOptional()).thenReturn(Optional.of(expected));
 
         Perfil result = service.definirPerfilCliente(null, null, null);
@@ -76,21 +76,19 @@ public class PerfilServiceTest {
         p3000.pontuacao = 90;
 
         // para total = 1000 deve mapear para MODERADO
-        when(repository.find(eq("nome"), eq("MODERADO"))).thenReturn(query);
-        when(query.firstResultOptional()).thenReturn(Optional.of(p1000));
+        when(repository.find(eq("nome"), (Object[]) any())).thenReturn(query);
+        when(query.firstResultOptional()).thenReturn(Optional.of(p1000))
+                .thenReturn(Optional.of(p3000));
         Perfil r1 = service.definirPerfilCliente(new BigDecimal("1000"), FrequenciaInvestimento.MEDIA, PreferenciaInvestimento.LIQUIDEZ);
         assertEquals("MODERADO", r1.nome);
 
         // ajustar stubs para 3000 -> AGRESSIVO
-        when(repository.find(eq("nome"), eq("AGRESSIVO"))).thenReturn(query);
-        when(query.firstResultOptional()).thenReturn(Optional.of(p3000));
         Perfil r2 = service.definirPerfilCliente(new BigDecimal("3000"), FrequenciaInvestimento.ALTA, PreferenciaInvestimento.RENTABILIDADE);
         assertEquals("AGRESSIVO", r2.nome);
     }
 
     @Test
     void definirPerfilCliente_deveLancarNotFound_quandoPerfilNaoExistir() {
-        // Evita ambiguidade entre sobrecargas; castear para Object[] para corresponder ao varargs
         when(repository.find(anyString(), (Object[]) any())).thenReturn(query);
         when(query.firstResultOptional()).thenReturn(Optional.empty());
 
