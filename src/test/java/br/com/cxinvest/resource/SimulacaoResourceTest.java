@@ -12,7 +12,7 @@ public class SimulacaoResourceTest {
     @Test
     public void porProdutoDia_deveRetornarResumoComCamposEsperados() {
         given()
-          .when().get("/simulacos/por-produto-dia")
+          .when().get("/simulacoes/por-produto-dia")
           .then()
              .statusCode(200)
              .body("size()", greaterThan(0))
@@ -22,4 +22,3 @@ public class SimulacaoResourceTest {
              .body("[0].mediaValorFinal", notNullValue());
     }
 }
-

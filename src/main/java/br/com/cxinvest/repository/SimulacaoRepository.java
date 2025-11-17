@@ -4,10 +4,12 @@ import br.com.cxinvest.dto.simulacao.SimulacaoProdutoDiaResponse;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.entity.Cliente;
 import br.com.cxinvest.entity.ClientePerfilHistorico;
+import br.com.cxinvest.entity.Simulacao;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -76,29 +78,58 @@ public class SimulacaoRepository {
      * @return lista de SimulacaoProdutoDiaResponse com agregações diárias por produto
      */
     public List<SimulacaoProdutoDiaResponse> produtoDiaInfo() {
-        String sql = "SELECT p.nome as produtoNome, DATE(s.data_simulacao) as dia, COUNT(*) as totalSim, AVG(s.valor_final) as mediaValorFinal "
-                + "FROM tb_simulacoes s JOIN tb_produtos p ON p.id = s.produto_id "
-                + "GROUP BY p.nome, DATE(s.data_simulacao) "
-                + "ORDER BY p.nome, DATE(s.data_simulacao) DESC";
+        return produtoDiaInfo(0, 10);
+    }
 
-        var query = em.createNativeQuery(sql);
+    /**
+     * Retorna resumido por todos os produtos a informação de:
+     * nome do produto,
+     * data,
+     * total de simulacoes por dia,
+     * media de ValorFinal por dia.
+     *
+     * Versão paginada: aceita page e size e aplica LIMIT/OFFSET na query nativa.
+     *
+     * @param page página 0-based
+     * @param size tamanho da página
+     * @return lista de SimulacaoProdutoDiaResponse com agregações diárias por produto
+     */
+    public List<SimulacaoProdutoDiaResponse> produtoDiaInfo(int page, int size) {
+        if (page < 0) page = 0;
+        if (size <= 0) size = 10;
+        int offset = page * size;
+
+        // Agrupa por dia (data sem hora) usando FUNCTION('DATE', ...) para portabilidade do agrupamento por dia
+        String jpql = "SELECT p.nome, FUNCTION('DATE', s.dataSimulacao), COUNT(s), AVG(s.valorFinal) "
+                + "FROM Simulacao s JOIN s.produto p "
+                + "GROUP BY p.nome, FUNCTION('DATE', s.dataSimulacao) "
+                + "ORDER BY p.nome, FUNCTION('DATE', s.dataSimulacao) DESC";
+
+        var query = em.createQuery(jpql, Object[].class);
+        query.setFirstResult(offset);
+        query.setMaxResults(size);
+
         @SuppressWarnings("unchecked")
         List<Object[]> rows = query.getResultList();
         List<SimulacaoProdutoDiaResponse> result = new ArrayList<>();
         for (Object[] row : rows) {
             String produtoNome = row[0] != null ? row[0].toString() : null;
-            LocalDate dia = null;
-            if (row[1] instanceof Date d) {
+            java.time.LocalDate dia = null;
+            if (row[1] instanceof java.sql.Date d) {
                 dia = d.toLocalDate();
             } else if (row[1] instanceof java.sql.Timestamp ts) {
                 dia = ts.toLocalDateTime().toLocalDate();
+            } else if (row[1] instanceof java.time.LocalDate ld) {
+                dia = ld;
+            } else if (row[1] instanceof java.time.Instant inst) {
+                dia = inst.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
             } else if (row[1] != null) {
-                dia = LocalDate.parse(row[1].toString());
+                dia = java.time.LocalDate.parse(row[1].toString());
             }
             Long totalSim = null;
             if (row[2] instanceof Number n) totalSim = n.longValue();
-            BigDecimal media = null;
-            if (row[3] instanceof Number m) media = new BigDecimal(m.toString());
+            java.math.BigDecimal media = null;
+            if (row[3] instanceof Number m) media = new java.math.BigDecimal(m.toString());
 
             result.add(new SimulacaoProdutoDiaResponse(produtoNome, dia, totalSim, media));
         }
@@ -116,6 +147,50 @@ public class SimulacaoRepository {
                 "SELECT h.criadoEm, h.perfilAnterior.nome, h.perfilNovo.nome, h.motivo FROM ClientePerfilHistorico h WHERE h.cliente.id = :cid ORDER BY h.criadoEm DESC",
                 Object[].class);
         q.setParameter("cid", clienteId);
+        return q.getResultList();
+    }
+
+    /**
+     * Persiste uma simulação no banco.
+     * @param s entidade Simulacao
+     * @return a entidade persistida
+     */
+    @Transactional
+    public Simulacao salvarSimulacao(Simulacao s) {
+        em.persist(s);
+        return s;
+    }
+
+    /**
+     * Busca simulações de um cliente com paginação.
+     * @param clienteId id do cliente
+     * @param page número da página (0-based)
+     * @param size tamanho da página
+     * @return lista de Simulacao
+     */
+    public List<Simulacao> buscarPorCliente(Long clienteId, int page, int size) {
+        if (clienteId == null) return List.of();
+        TypedQuery<Simulacao> q = em.createQuery("SELECT s FROM Simulacao s WHERE s.cliente.id = :cid ORDER BY s.dataSimulacao DESC", Simulacao.class);
+        q.setParameter("cid", clienteId);
+        if (page < 0) page = 0;
+        if (size <= 0) size = 10;
+        q.setFirstResult(page * size);
+        q.setMaxResults(size);
+        return q.getResultList();
+    }
+
+    /**
+     * Busca todas as simulações com paginação.
+     * @param page número da página (0-based)
+     * @param size tamanho da página
+     * @return lista de Simulacao
+     */
+    public List<Simulacao> buscarTodos(int page, int size) {
+        TypedQuery<Simulacao> q = em.createQuery("SELECT s FROM Simulacao s ORDER BY s.dataSimulacao DESC", Simulacao.class);
+        if (page < 0) page = 0;
+        if (size <= 0) size = 10;
+        q.setFirstResult(page * size);
+        q.setMaxResults(size);
         return q.getResultList();
     }
 }

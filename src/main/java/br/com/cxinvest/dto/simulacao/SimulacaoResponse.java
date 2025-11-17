@@ -1,15 +1,17 @@
 package br.com.cxinvest.dto.simulacao;
 
-import br.com.cxinvest.entity.Produto;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-
 import java.math.BigDecimal;
 
+/**
+ * DTO de retorno da simulação contendo resumo do resultado e referências ao produto/cliente.
+ */
 public record SimulacaoResponse(
-
-        //Produto produtoValidado
-        //resultado da simulação
+        Long produtoId,
+        String produtoNome,
+        Long clienteId,
+        java.math.BigDecimal valorSimulacao,
+        java.math.BigDecimal valorFinal,
+        Integer prazoMeses,
+        java.math.BigDecimal rentabilidadeEfetiva
 ) {
 }

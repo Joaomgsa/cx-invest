@@ -12,12 +12,11 @@ public interface SimulacaoService {
 
     SimulacaoResponse simular(SimulacaoRequest simulacaoRequest);
 
-    SimulacaoHistoricoResponse historico(SimulacaoRequest simulacaoRequest);
+    // Busca histórico paginado de simulações (sem filtro por cliente)
+    List<SimulacaoHistoricoResponse> historico(int page, int size);
 
-    List<SimulacaoProdutoDiaResponse> produtoDia();
+    // Retorna agregações por produto por dia com paginação
+    List<SimulacaoProdutoDiaResponse> produtoDia(int page, int size);
 
 
 }
-
-
-

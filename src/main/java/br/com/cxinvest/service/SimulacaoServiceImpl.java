@@ -4,6 +4,7 @@ import br.com.cxinvest.dto.simulacao.SimulacaoHistoricoResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoProdutoDiaResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoRequest;
 import br.com.cxinvest.dto.simulacao.SimulacaoResponse;
+import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.repository.SimulacaoRepository;
 import br.com.cxinvest.repository.ClienteRepository;
 import br.com.cxinvest.entity.Enum.TipoProduto;
@@ -30,27 +31,98 @@ public class SimulacaoServiceImpl implements SimulacaoService {
     @Inject
     ClienteRepository clienteRepository;
 
+    /*
+        * Método de simulação de investimento.
+        *    Etapas da simulação (não implementadas):
+        *    1. Validar o tipo de produto solicitado.
+        *    2. Verificar se o produto é adequado ao perfil do cliente.
+        *    3. Calcular a rentabilidade final com base no valor investido, taxa e período.
+        *    4. Persistir e retornar o SimulacaoResponse com os dados da simulação.
+        *
+     */
     @Override
     public SimulacaoResponse simular(SimulacaoRequest simulacaoRequest) {
-        // chama repositório apenas para utilizar consultas; lógica de simulação não implementada
-        if (simulacaoRequest != null && simulacaoRequest.tipoProduto() != null) {
-            repository.findProdutosByTipo(simulacaoRequest.tipoProduto());
+        if (simulacaoRequest == null) {
+            throw new BadRequestException("Requisição de simulação inválida");
         }
-        return null;
+
+        // 1) validar tipo de produto informado
+        var tipoOpt = validarProduto(simulacaoRequest.tipoProduto());
+        if (tipoOpt.isEmpty()) {
+            throw new BadRequestException("Tipo de produto inválido: " + simulacaoRequest.tipoProduto());
+        }
+
+        // 2) recuperar produtos pelo tipo e escolher um (modelo simples: primeiro da lista)
+        List<Produto> produtos = repository.findProdutosByTipo(simulacaoRequest.tipoProduto());
+        if (produtos == null || produtos.isEmpty()) {
+            throw new NotFoundException("Nenhum produto encontrado para o tipo: " + simulacaoRequest.tipoProduto());
+        }
+        Produto produto = produtos.stream().findFirst().orElseThrow(() -> new NotFoundException("Nenhum produto encontrado para o tipo: " + simulacaoRequest.tipoProduto()));
+
+        // 3) verificar se o produto é adequado ao perfil do cliente
+        validarPerfilProduto(produto.id, simulacaoRequest.clienteId());
+
+        // 4) calcular rentabilidade final
+        BigDecimal valorSim = simulacaoRequest.valor();
+        int meses = simulacaoRequest.prazoMeses();
+        BigDecimal taxaMensal = produto.rentabilidadeMensal;
+        BigDecimal valorFinal = calcularRentabilidadeFinal(valorSim, taxaMensal, meses);
+
+        // determinar rentabilidade efetiva (retorno percentual total)
+        BigDecimal rentabilidadeEfetiva = null;
+        if (valorFinal != null && valorSim != null && valorSim.compareTo(BigDecimal.ZERO) > 0) {
+            rentabilidadeEfetiva = valorFinal.subtract(valorSim).divide(valorSim, 6, RoundingMode.HALF_EVEN);
+        }
+
+        // persistir simulação
+        var clienteOpt = clienteRepository.findByIdOptional(simulacaoRequest.clienteId());
+        var cliente = clienteOpt.orElseThrow(() -> new NotFoundException("Cliente não encontrado: " + simulacaoRequest.clienteId()));
+
+        var simulacao = new br.com.cxinvest.entity.Simulacao();
+        simulacao.produto = produto;
+        simulacao.cliente = cliente;
+        simulacao.rentabilidadeEfetiva = rentabilidadeEfetiva != null ? rentabilidadeEfetiva : BigDecimal.ZERO;
+        simulacao.valorSimulacao = valorSim;
+        simulacao.valorFinal = valorFinal != null ? valorFinal : valorSim;
+        simulacao.prazoMeses = meses;
+
+        repository.salvarSimulacao(simulacao);
+
+        return new SimulacaoResponse(
+                produto.id,
+                produto.nome,
+                cliente.id,
+                simulacao.valorSimulacao,
+                simulacao.valorFinal,
+                simulacao.prazoMeses,
+                simulacao.rentabilidadeEfetiva
+        );
+    }
+
+    /*
+        Metodo recebe parametros para paginar o historico de simulacoes realizadas.
+     */
+    @Override
+    public List<SimulacaoHistoricoResponse> historico(int page, int size) {
+        List<br.com.cxinvest.entity.Simulacao> sims = repository.buscarTodos(page, size);
+        return sims.stream().map(s -> new SimulacaoHistoricoResponse(
+                s.id,
+                s.produto != null ? s.produto.id : null,
+                s.produto != null ? s.produto.nome : null,
+                s.cliente != null ? s.cliente.id : null,
+                s.valorSimulacao,
+                s.valorFinal,
+                s.prazoMeses,
+                s.rentabilidadeEfetiva,
+                s.dataSimulacao
+        )).toList();
     }
 
     @Override
-    public SimulacaoHistoricoResponse historico(SimulacaoRequest simulacaoRequest) {
-        if (simulacaoRequest != null) {
-            repository.buscarHistoricoPerfilDoCliente(simulacaoRequest.clienteId());
-        }
-        return null;
-    }
-
-    @Override
-    public List<SimulacaoProdutoDiaResponse> produtoDia() {
-        List<SimulacaoProdutoDiaResponse> produtoDiaInfo = repository.produtoDiaInfo();
-        return produtoDiaInfo;
+    public List<SimulacaoProdutoDiaResponse> produtoDia(int page, int size) {
+        int p = Math.max(0, page);
+        int s = size <= 0 ? 10 : size;
+        return repository.produtoDiaInfo(p, s);
     }
 
     /**
