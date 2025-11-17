@@ -1,5 +1,6 @@
 package br.com.cxinvest.service;
 
+import br.com.cxinvest.dto.perfil.PerfilRiscoResponse;
 import br.com.cxinvest.entity.Cliente;
 import br.com.cxinvest.repository.ClienteRepository;
 import br.com.cxinvest.repository.PerfilRepository;
@@ -142,5 +143,11 @@ public class ClienteService {
             throw new NotFoundException("Cliente não encontrado: " + id);
         }
         repository.removeById(id);
+    }
+
+
+
+    public PerfilRiscoResponse perfilRiscoCliente(Long cliente_id){
+        return null;
     }
 }

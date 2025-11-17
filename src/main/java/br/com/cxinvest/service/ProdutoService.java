@@ -1,5 +1,6 @@
 package br.com.cxinvest.service;
 
+import br.com.cxinvest.dto.ProdutoResponse;
 import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.repository.PerfilRepository;
@@ -83,5 +84,9 @@ public class ProdutoService {
             throw new NotFoundException("Produto não encontrado: " + id);
         }
         repository.removeById(id);
+    }
+
+    public List<ProdutoResponse> produtosRecomendadosPerfil(String perfil){
+        return null;
     }
 }

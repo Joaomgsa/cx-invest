@@ -1,5 +1,6 @@
 package br.com.cxinvest.repository;
 
+import br.com.cxinvest.dto.perfil.PerfilRiscoResponse;
 import br.com.cxinvest.entity.Cliente;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,6 +29,11 @@ public class ClienteRepository implements PanacheRepository<Cliente> {
 
     public void removeById(Long id) {
         delete("id", id);
+    }
+
+    public Optional<PerfilRiscoResponse> buscarPerfilRisco(Long id) {
+        // metodo que busca as informaçoes de perfil do cliente
+        return null;
     }
 }
 

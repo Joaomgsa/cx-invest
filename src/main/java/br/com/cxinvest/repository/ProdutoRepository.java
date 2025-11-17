@@ -26,5 +26,9 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
     public void removeById(Long id) {
         delete("id", id);
     }
+
+    public Optional<List<Produto>> listarProdutosPorPerfil(String perfil) {
+        return null;
+    }
 }
 
