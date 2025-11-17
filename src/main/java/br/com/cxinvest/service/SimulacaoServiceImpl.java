@@ -5,6 +5,7 @@ import br.com.cxinvest.dto.simulacao.SimulacaoProdutoDiaResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoRequest;
 import br.com.cxinvest.dto.simulacao.SimulacaoResponse;
 import br.com.cxinvest.entity.Produto;
+import br.com.cxinvest.entity.Simulacao;
 import br.com.cxinvest.repository.SimulacaoRepository;
 import br.com.cxinvest.repository.ClienteRepository;
 import br.com.cxinvest.entity.Enum.TipoProduto;
@@ -78,7 +79,7 @@ public class SimulacaoServiceImpl implements SimulacaoService {
         var clienteOpt = clienteRepository.findByIdOptional(simulacaoRequest.clienteId());
         var cliente = clienteOpt.orElseThrow(() -> new NotFoundException("Cliente não encontrado: " + simulacaoRequest.clienteId()));
 
-        var simulacao = new br.com.cxinvest.entity.Simulacao();
+        var simulacao = new Simulacao();
         simulacao.produto = produto;
         simulacao.cliente = cliente;
         simulacao.rentabilidadeEfetiva = rentabilidadeEfetiva != null ? rentabilidadeEfetiva : BigDecimal.ZERO;

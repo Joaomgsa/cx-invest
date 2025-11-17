@@ -48,4 +48,6 @@ public class SimulacaoResource {
     ) {
         return simulacaoService.historico(page, size);
     }
+
+
 }
