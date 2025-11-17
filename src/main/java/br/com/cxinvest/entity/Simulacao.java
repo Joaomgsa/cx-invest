@@ -25,6 +25,9 @@ public class Simulacao {
     @Column(name = "rentabilidade_efetiva", nullable = false)
     public BigDecimal rentabilidadeEfetiva;
 
+    @Column(name = "valor_simulacao", nullable = false)
+    public BigDecimal valorSimulacao;
+
     @Column(name = "valor_final", nullable = false)
     public BigDecimal valorFinal;
 
