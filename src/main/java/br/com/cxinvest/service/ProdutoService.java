@@ -12,6 +12,9 @@ import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
 
+
+//TODO: adicionar soft delete para nao perder histórico de perfis vinculados a produtos e clientes
+
 @ApplicationScoped
 public class ProdutoService {
 

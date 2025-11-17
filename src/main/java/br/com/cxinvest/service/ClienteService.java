@@ -13,6 +13,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
 
+/**
+ * Serviço responsável pelas operações CRUD de Cliente e pela integração
+ * com a lógica de definição e registro de perfis de investimento.
+ *
+ * Boas práticas aplicadas:
+ * - métodos transacionais para operações que alteram estado
+ * - uso de Optional para atualização seletiva de campos
+ * - delegação da lógica de definição de perfil ao PerfilService
+ */
 @ApplicationScoped
 public class ClienteService {
 
@@ -28,14 +37,31 @@ public class ClienteService {
     @Inject
     ClientePerfilService clientePerfilService;
 
+    /**
+     * Lista todos os clientes.
+     * @return lista de clientes (pode ser vazia)
+     */
     public List<Cliente> listarTodos() {
         return repository.listAllClientes();
     }
 
+    /**
+     * Busca um cliente por id.
+     * @param id identificador do cliente
+     * @return Optional contendo o cliente caso exista
+     */
     public Optional<Cliente> buscarPorId(Long id) {
         return repository.findByIdOptional(id);
     }
 
+    /**
+     * Cria um novo cliente. Se o perfil não for informado, o perfil será
+     * calculado automaticamente com base nos dados financeiros e atribuído.
+     * Também registra um histórico de decisão de perfil.
+     *
+     * @param cliente entidade cliente (campos opcionais serão tratados com valores padrão)
+     * @return o cliente persistido com id e perfil atualizados
+     */
     @Transactional
     public Cliente criar(Cliente cliente) {
 
@@ -63,6 +89,14 @@ public class ClienteService {
         return cliente;
     }
 
+    /**
+     * Atualiza os dados de um cliente existente. Se o perfil for alterado,
+     * registra um histórico de decisão de perfil.
+     *
+     * @param id identificador do cliente a ser atualizado
+     * @param clienteAtualizado entidade cliente com dados atualizados
+     * @return cliente atualizado
+     */
     @Transactional
     public Cliente atualizar(Long id, Cliente clienteAtualizado) {
         Cliente existente = repository.findById(id);
@@ -97,6 +131,11 @@ public class ClienteService {
         return existente;
     }
 
+    /**
+     * Remove um cliente pelo id. O cliente deve existir.
+     *
+     * @param id identificador do cliente a ser removido
+     */
     @Transactional
     public void remover(Long id) {
         Cliente existente = repository.findById(id);

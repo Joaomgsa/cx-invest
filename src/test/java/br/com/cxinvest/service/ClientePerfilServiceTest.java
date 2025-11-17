@@ -17,6 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes unitários para ClientePerfilService.
+ * Verifica comportamento de persistência do histórico e atualização do cliente
+ * em cenário de sucesso e condições de falha (entrada nula e falha do EntityManager).
+ */
 public class ClientePerfilServiceTest {
 
     @Mock
@@ -43,6 +48,10 @@ public class ClientePerfilServiceTest {
         }
     }
 
+    /**
+     * Cenário de sucesso: garante que é persistido um ClientePerfilHistorico
+     * com os dados corretos e que o cliente é atualizado com o novo perfil.
+     */
     @Test
     void aplicarDecisaoDePerfil_devePersistirHistoricoEAtualizarCliente() {
         Cliente cliente = new Cliente();
@@ -82,6 +91,10 @@ public class ClientePerfilServiceTest {
         assertSame(novo, cliente.perfilInvestimento);
     }
 
+    /**
+     * Cenário de erro: cliente nulo deve lançar NullPointerException e
+     * não interagir com o EntityManager.
+     */
     @Test
     void aplicarDecisaoDePerfil_clienteNulo_deveLancarNPE() {
         Perfil novo = new Perfil();
@@ -93,6 +106,10 @@ public class ClientePerfilServiceTest {
         verifyNoInteractions(em);
     }
 
+    /**
+     * Cenário de erro: quando o EntityManager.persist lançar, a exceção
+     * é propagada e merge não é chamado.
+     */
     @Test
     void aplicarDecisaoDePerfil_persistFalha_devePropagarExcecao() {
         Cliente cliente = new Cliente();

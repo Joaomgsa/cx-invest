@@ -16,6 +16,8 @@ import java.math.BigDecimal;
 @ApplicationScoped
 public class PerfilService {
 
+
+    //TODO: adicionar soft delete para nao perder histórico de perfis vinculados a produtos e clientes
     @Inject
     PerfilRepository repository;
 
