@@ -16,7 +16,6 @@ import java.util.Objects;
 /**
  * Serviço responsável pelas operações CRUD de Cliente e pela integração
  * com a lógica de definição e registro de perfis de investimento.
- *
  * Boas práticas aplicadas:
  * - métodos transacionais para operações que alteram estado
  * - uso de Optional para atualização seletiva de campos
@@ -55,12 +54,12 @@ public class ClienteService {
     }
 
     /**
-     * Cria um novo cliente. Se o perfil não for informado, o perfil será
+     * Cria um cliente. Se o perfil não for informado, o perfil será
      * calculado automaticamente com base nos dados financeiros e atribuído.
      * Também registra um histórico de decisão de perfil.
      *
      * @param cliente entidade cliente (campos opcionais serão tratados com valores padrão)
-     * @return o cliente persistido com id e perfil atualizados
+     * @return o cliente persistido com "id" e perfil atualizados
      */
     @Transactional
     public Cliente criar(Cliente cliente) {
@@ -132,7 +131,7 @@ public class ClienteService {
     }
 
     /**
-     * Remove um cliente pelo id. O cliente deve existir.
+     * Remove um cliente pelo "id". O cliente deve existir.
      *
      * @param id identificador do cliente a ser removido
      */

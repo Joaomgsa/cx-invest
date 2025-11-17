@@ -13,6 +13,17 @@ import java.util.List;
 import java.util.Optional;
 import java.math.BigDecimal;
 
+/**
+ * Serviço responsável por gerenciar perfis de investimento.
+ *
+ * Responsabilidades:
+ * - operações CRUD básicas sobre a entidade Perfil
+ * - definir o perfil de um cliente com base em regras de negócio
+ *
+ * Observações:
+ * - em cenários reais recomenda-se implementar soft-delete (TODO na classe)
+ *   para não perder histórico vinculado a produtos/cliente.
+ */
 @ApplicationScoped
 public class PerfilService {
 
@@ -21,20 +32,41 @@ public class PerfilService {
     @Inject
     PerfilRepository repository;
 
+    /**
+     * Retorna todos os perfis persistidos.
+     * @return lista de perfis (pode ser vazia)
+     */
     public List<Perfil> listarTodos() {
         return repository.listAllPerfis();
     }
 
+    /**
+     * Busca um perfil por identificador.
+     * @param id identificador do perfil
+     * @return Optional contendo o perfil caso exista
+     */
     public Optional<Perfil> buscarPorId(Long id) {
         return repository.findByIdOptional(id);
     }
 
+    /**
+     * Persiste um novo perfil no banco.
+     * @param perfil objeto Perfil a ser criado
+     * @return o perfil persistido (com id gerado)
+     */
     @Transactional
     public Perfil criar(Perfil perfil) {
         repository.persistPerfil(perfil);
         return perfil;
     }
 
+    /**
+     * Atualiza os dados de um perfil existente.
+     * @param id identificador do perfil a ser atualizado
+     * @param perfilAtualizado objeto contendo os novos valores
+     * @return o perfil atualizado
+     * @throws NotFoundException se o perfil não existir
+     */
     @Transactional
     public Perfil atualizar(Long id, Perfil perfilAtualizado) {
         Optional<Perfil> existenteOpt = repository.findByIdOptional(id);
@@ -49,6 +81,11 @@ public class PerfilService {
         return existente;
     }
 
+    /**
+     * Remove um perfil.
+     * @param id identificador do perfil a remover
+     * @throws NotFoundException se o perfil não existir
+     */
     @Transactional
     public void remover(Long id) {
         Optional<Perfil> existenteOpt = repository.findByIdOptional(id);
@@ -58,15 +95,29 @@ public class PerfilService {
         repository.removeById(id);
     }
 
-
+    /**
+     * Calcula e retorna um Perfil adequado para um cliente com base no
+     * total investido, frequência de investimento e preferência.
+     *
+     * Regras (resumidas):
+     * - totalInvestido é avaliado contra thresholds (1k, 3k) para atribuir weight
+     * - soma dos pesos (total + frequência + preferência) resulta em um score
+     * - score <=1 -> CONSERVADOR, <=3 -> MODERADO, >3 -> AGRESSIVO
+     *
+     * @param totalInvestido valor total investido pelo cliente (pode ser null)
+     * @param frequencia frequência de investimento (pode ser null, usa MEDIA)
+     * @param preferencia preferência de investimento (pode ser null, usa LIQUIDEZ)
+     * @return Perfil encontrado correspondente às regras
+     * @throws NotFoundException se não houver perfil cadastrado com o nome calculado
+     */
     public Perfil definirPerfilCliente(BigDecimal totalInvestido, FrequenciaInvestimento frequencia, PreferenciaInvestimento preferencia) {
         final var tv = (totalInvestido == null) ? BigDecimal.ZERO : totalInvestido;
 
-        // calcular peso do totalInvestido usando lista ordenada de thresholds
+
         record Threshold(BigDecimal limite, int weight) {}
         var thresholds = List.of(
-                new Threshold(new BigDecimal("3000"), 2),
-                new Threshold(new BigDecimal("1000"), 1)
+                new Threshold(new BigDecimal("500000"), 2),
+                new Threshold(new BigDecimal("50000"), 1)
         );
 
         int totalInvestidoWeight = thresholds.stream()
