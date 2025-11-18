@@ -220,3 +220,24 @@ INSERT INTO tb_investimentos (id, cliente_id, produto_id, valor_investido, renta
 INSERT INTO tb_investimentos (id, cliente_id, produto_id, valor_investido, rentabilidade, data_investimento) VALUES (98, 10, 2, 2000.00, 0.010, '2025-08-29T09:30:00Z');
 INSERT INTO tb_investimentos (id, cliente_id, produto_id, valor_investido, rentabilidade, data_investimento) VALUES (99, 10, 3, 2100.00, 0.011, '2025-09-28T12:20:00Z');
 INSERT INTO tb_investimentos (id, cliente_id, produto_id, valor_investido, rentabilidade, data_investimento) VALUES (100, 10, 4, 2200.00, 0.011, '2025-10-27T10:00:00Z');
+
+-- Criação da tabela de telemetria (eventos)
+CREATE TABLE IF NOT EXISTS tb_telemetria_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  servico TEXT NOT NULL,
+  tempo_resposta_ms INTEGER NOT NULL,
+  data_evento TEXT NOT NULL
+);
+
+-- Inserir eventos de telemetria de exemplo (outubro/2025)
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('simular-investimento', 240, '2025-10-01T10:00:00Z');
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('simular-investimento', 260, '2025-10-05T11:15:00Z');
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('simular-investimento', 255, '2025-10-10T09:30:00Z');
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('simular-investimento', 245, '2025-10-15T14:00:00Z');
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('simular-investimento', 250, '2025-10-20T08:45:00Z');
+
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('perfil-risco', 170, '2025-10-02T12:10:00Z');
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('perfil-risco', 190, '2025-10-08T13:20:00Z');
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('perfil-risco', 180, '2025-10-18T15:40:00Z');
+INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('perfil-risco', 185, '2025-10-25T09:05:00Z');
+
