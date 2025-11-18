@@ -27,8 +27,13 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
         delete("id", id);
     }
 
-    public Optional<List<Produto>> listarProdutosPorPerfil(String perfil) {
-        return null;
+
+    /*
+    * Consulta que retorna todos os produtos de determinado perfil de investidor (por perfilId)
+    *      */
+    public Optional<List<Produto>> listarProdutosPorPerfil(Long perfilId) {
+        // busca por id do perfil associado (perfilInvestimento.id)
+        List<Produto> produtos = list("perfilInvestimento.id = ?1", perfilId);
+        return produtos == null || produtos.isEmpty() ? Optional.empty() : Optional.of(produtos);
     }
 }
-

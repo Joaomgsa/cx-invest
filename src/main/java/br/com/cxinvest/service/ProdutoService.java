@@ -25,13 +25,6 @@ public class ProdutoService {
     @Inject
     PerfilRepository perfilRepository;
 
-    // Construtor para facilitar testes unitários
-    public ProdutoService() {}
-
-    public ProdutoService(ProdutoRepository repository, PerfilRepository perfilRepository) {
-        this.repository = repository;
-        this.perfilRepository = perfilRepository;
-    }
 
     public List<Produto> listarTodos() {
         return repository.listAllProdutos();
@@ -86,7 +79,17 @@ public class ProdutoService {
         repository.removeById(id);
     }
 
-    public List<ProdutoResponse> produtosRecomendadosPerfil(String perfil){
-        return null;
+    public List<ProdutoResponse> produtosRecomendadosPerfil(Long perfilId) {
+        var opt = repository.listarProdutosPorPerfil(perfilId);
+        return opt
+                .map(list -> list.stream().map(p -> new ProdutoResponse(
+                        p.id,
+                        p.nome,
+                        p.tipo,
+                        p.rentabilidadeMensal,
+                        p.perfilInvestimento != null ? p.perfilInvestimento.id : null,
+                        p.perfilInvestimento != null ? p.perfilInvestimento.nome : null
+                )).toList())
+                .orElseGet(List::of);
     }
 }
