@@ -8,6 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,13 +40,28 @@ public class InvestimentoService {
         }
 
         List<Investimento> lista = repository.listarPorCliente(clienteId, page, size, asc);
-        return lista.stream().map(i -> new HistoricoInvestimentoResponse(
-                i.id,
-                i.produto != null ? i.produto.tipo : null,
-                i.valorInvestido,
-                i.rentabilidade,
-                i.dataInvestimento != null ? i.dataInvestimento.toString() : null
-        )).toList();
+        return lista.stream().map(i -> {
+            // obter data de forma compatível: preferir campo OffsetDateTime, fallback para getter Instant
+            String data;
+            if (i.dataInvestimento != null) {
+                data = i.dataInvestimento.toString();
+            } else {
+                Instant inst = null;
+                try {
+                    inst = i.getDataInvestimento();
+                } catch (NoSuchMethodError e) {
+                    inst = null; // compatibilidade binária: se não existir getter, ignora
+                }
+                data = inst != null ? inst.toString() : null;
+            }
+            return new HistoricoInvestimentoResponse(
+                    i.id,
+                    i.produto != null ? i.produto.tipo : null,
+                    i.valorInvestido,
+                    i.rentabilidade,
+                    data
+            );
+        }).toList();
     }
 
     // método existente mantido para compatibilidade
