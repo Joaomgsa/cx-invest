@@ -50,11 +50,9 @@ public class ProdutoService {
 
     @Transactional
     public Produto atualizar(Long id, Produto produtoAtualizado) {
-        Optional<Produto> existenteOpt = repository.findByIdOptional(id);
-        if (existenteOpt.isEmpty()) {
-            throw new NotFoundException("Produto não encontrado: " + id);
-        }
-        Produto existente = existenteOpt.get();
+        Produto existente = repository.findByIdOptional(id)
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado: " + id));
+
         existente.nome = produtoAtualizado.nome;
         existente.tipo = produtoAtualizado.tipo;
         existente.rentabilidadeMensal = produtoAtualizado.rentabilidadeMensal;

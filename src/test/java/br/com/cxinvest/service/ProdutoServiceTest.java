@@ -8,6 +8,7 @@ import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -27,6 +28,7 @@ public class ProdutoServiceTest {
     @Mock
     PerfilRepository perfilRepository;
 
+    @InjectMocks
     ProdutoService service;
 
     private AutoCloseable closeable;
@@ -34,7 +36,7 @@ public class ProdutoServiceTest {
     @BeforeEach
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
-        service = new ProdutoService(repository, perfilRepository);
+
     }
 
     @AfterEach
@@ -103,9 +105,12 @@ public class ProdutoServiceTest {
 
     @Test
     void atualizar_deveLancarNotFound_quandoNaoExiste() {
-        when(repository.findByIdOptional(99L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> service.atualizar(99L, new Produto()));
+        Long idInexistente = 123L;
+        when(repository.findByIdOptional(idInexistente)).thenReturn(Optional.empty());
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> service.atualizar(idInexistente, new Produto()));
     }
+
 
     @Test
     void remover_deveLancarNotFound_quandoNaoExiste() {

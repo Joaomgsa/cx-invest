@@ -64,27 +64,31 @@ public class SimulacaoServiceImplTest {
 
     @Test
     public void simular_deveRetornarResultado_quandoRequisicaoValida() {
-        when(repository.findProdutosByTipo("CDB")).thenReturn(List.of(produto));
-        when(repository.findProdutoById(10L)).thenReturn(Optional.of(produto));
-        when(clienteRepository.findByIdOptional(1L)).thenReturn(Optional.of(cliente));
-        when(repository.salvarSimulacao(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var req = new SimulacaoRequest(1L, new BigDecimal("1000"), 12, "CDB");
-        SimulacaoResponse resp = service.simular(req);
+            when(repository.findProdutosByTipo("CDB")).thenReturn(List.of(produto));
+            when(repository.findProdutoById(10L)).thenReturn(Optional.of(produto));
+            when(clienteRepository.findByIdOptional(1L)).thenReturn(Optional.of(cliente));
+            when(repository.salvarSimulacao(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertNotNull(resp);
-        assertEquals(10L, resp.produtoId());
-        assertEquals(1L, resp.clienteId());
-        assertEquals(12, resp.prazoMeses());
+            var req = new SimulacaoRequest(1L, new BigDecimal("1000"), 12, "CDB");
+            SimulacaoResponse resp = service.simular(req);
 
-        // calcula valor final esperado usando mesma lógica
-        BigDecimal valorSim = new BigDecimal("1000");
-        BigDecimal taxa = produto.rentabilidadeMensal;
-        MathContext mc = MathContext.DECIMAL128;
-        BigDecimal esperado = valorSim.multiply(BigDecimal.ONE.add(taxa, mc).pow(12, mc), mc).setScale(2, RoundingMode.HALF_EVEN);
-        assertEquals(esperado, resp.valorFinal());
+            assertNotNull(resp);
+            assertEquals(10L, resp.produtoValidado().id());
+            assertEquals(12, resp.resultadoSimulacao().prazoMeses());
 
-        verify(repository, times(1)).salvarSimulacao(any());
+            // calcula valor final esperado usando mesma lógica
+            BigDecimal valorSim = new BigDecimal("1000");
+            BigDecimal taxa = produto.rentabilidadeMensal;
+            MathContext mc = MathContext.DECIMAL128;
+            BigDecimal esperado = valorSim
+                    .multiply(BigDecimal.ONE.add(taxa, mc).pow(12, mc), mc)
+                    .setScale(2, RoundingMode.HALF_EVEN);
+
+            assertEquals(esperado, resp.resultadoSimulacao().valorFinal());
+
+            verify(repository, times(1)).salvarSimulacao(any());
+
     }
 
     @Test
