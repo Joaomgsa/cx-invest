@@ -1,16 +1,13 @@
 package br.com.cxinvest.service;
 
-import br.com.cxinvest.dto.telemetria.PeriodoResponse;
+import br.com.cxinvest.dto.telemetria.PeriodoTelemetriaResponse;
 import br.com.cxinvest.dto.telemetria.ServicoTelemetriaResponse;
 import br.com.cxinvest.dto.telemetria.TelemetriaResponse;
-import br.com.cxinvest.entity.TelemetriaEvento;
 import br.com.cxinvest.repository.TelemetriaRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.BadRequestException;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -19,40 +16,29 @@ import java.util.List;
 public class TelemetriaService {
 
     @Inject
-    TelemetriaRepository repository;
+    TelemetriaRepository telemetriaRepository;
 
-    // método que busca eventos no período (opcional) e agrega por serviço, com paginação
-    public TelemetriaResponse obterTelemetria(String inicioStr, String fimStr, int page, int size) {
-        OffsetDateTime inicio = null;
-        OffsetDateTime fim = null;
-        try {
-            if (inicioStr != null && !inicioStr.isBlank()) {
-                LocalDate ld = LocalDate.parse(inicioStr);
-                inicio = ld.atStartOfDay().atOffset(ZoneOffset.UTC);
-            }
-            if (fimStr != null && !fimStr.isBlank()) {
-                LocalDate ld2 = LocalDate.parse(fimStr);
-                fim = ld2.atTime(LocalTime.MAX).atOffset(ZoneOffset.UTC);
-            }
-        } catch (Exception e) {
-            throw new BadRequestException("Formato de data inválido. Use YYYY-MM-DD");
-        }
+    public TelemetriaResponse obterTelemetria(String inicio, String fim, int page, int size) {
+        // período default se não informado
+        LocalDate inicioEfetivo = (inicio != null && !inicio.isBlank())
+                ? LocalDate.parse(inicio)
+                : LocalDate.parse("2025-10-01");
 
-        // usar agregação no banco para obter lista paginada de serviços
-        List<ServicoTelemetriaResponse> pageList = repository.listarAgregadoPorPeriodo(inicio, fim, page, size);
+        LocalDate fimEfetivo = (fim != null && !fim.isBlank())
+                ? LocalDate.parse(fim)
+                : LocalDate.parse("2025-10-31");
 
-        // determinar periodo para resposta: preferir valores fornecidos, senão inferir a partir dos eventos
-        String periodoInicio = inicioStr != null && !inicioStr.isBlank() ? inicioStr :
-                repository.listarPorPeriodo(inicio, fim).stream().map(e -> e.dataEvento.toLocalDate()).min(LocalDate::compareTo).map(LocalDate::toString).orElse(null);
-        String periodoFim = fimStr != null && !fimStr.isBlank() ? fimStr :
-                repository.listarPorPeriodo(inicio, fim).stream().map(e -> e.dataEvento.toLocalDate()).max(LocalDate::compareTo).map(LocalDate::toString).orElse(null);
+        OffsetDateTime ini = inicioEfetivo.atStartOfDay().atOffset(ZoneOffset.UTC);
+        OffsetDateTime end = fimEfetivo.plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);
 
-        PeriodoResponse periodo = new PeriodoResponse(periodoInicio, periodoFim);
-        return new TelemetriaResponse(pageList, periodo);
-    }
+        List<ServicoTelemetriaResponse> servicos = telemetriaRepository
+                .listarAgregadoPorPeriodo(ini, end, page, size);
 
-    // compatibilidade com método antigo
-    public TelemetriaResponse obterTelemetria() {
-        return obterTelemetria(null, null, 0, Integer.MAX_VALUE);
+        PeriodoTelemetriaResponse periodo = new PeriodoTelemetriaResponse(
+                inicioEfetivo.toString(),
+                fimEfetivo.toString()
+        );
+
+        return new TelemetriaResponse(servicos, periodo);
     }
 }

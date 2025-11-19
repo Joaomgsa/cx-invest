@@ -4,7 +4,6 @@ import java.util.List;
 
 public record TelemetriaResponse(
         List<ServicoTelemetriaResponse> servicos,
-        PeriodoResponse periodo
-) {
-}
+        PeriodoTelemetriaResponse periodo
+) {}
 
