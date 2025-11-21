@@ -25,6 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes unitários para a implementação de simulação (SimulacaoServiceImpl).
+ * Cobre cenários de fluxo feliz, validações de tipo de produto e erros de negócio.
+ */
 @ExtendWith(MockitoExtension.class)
 public class SimulacaoServiceImplTest {
 

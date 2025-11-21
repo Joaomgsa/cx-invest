@@ -15,6 +15,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes unitários para o serviço que agrega simulações por produto e dia.
+ * Verifica delegação ao repositório e normalização de parâmetros de paginação.
+ */
 @ExtendWith(MockitoExtension.class)
 public class SimulacaoProdutoDiaServiceTest {
 

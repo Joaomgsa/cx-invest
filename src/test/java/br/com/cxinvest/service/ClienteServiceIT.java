@@ -15,6 +15,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Teste de integração para ClienteService usando persistência real (BD em memória/configuração do Quarkus test).
+ * Valida criação de cliente, atribuição de perfil e persistência de histórico.
+ */
 @QuarkusTest
 public class ClienteServiceIT {
 

@@ -16,6 +16,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+/**
+ * Testes unitários para o serviço de métricas (MetricsService).
+ * Verifica agregação e formatação do período retornado.
+ */
 @ExtendWith(MockitoExtension.class)
 public class MetricsServiceTest {
 
@@ -45,4 +49,3 @@ public class MetricsServiceTest {
         assertEquals("2025-10-31", resp.periodo().fim());
     }
 }
-

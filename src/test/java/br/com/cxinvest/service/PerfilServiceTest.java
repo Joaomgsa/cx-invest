@@ -20,6 +20,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes unitários para regras de determinação de perfil de investimento (PerfilService).
+ * Cobre cenários de mapeamento por pontuação, limites e erros quando perfil ausente.
+ */
 public class PerfilServiceTest {
 
     @Mock

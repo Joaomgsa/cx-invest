@@ -13,7 +13,7 @@ public enum FrequenciaInvestimento {
         };
     }
 
-    // Retorna peso numérico para cálculo de perfil
+
     public int weight() {
         return switch (this) {
             case ALTA -> 2;

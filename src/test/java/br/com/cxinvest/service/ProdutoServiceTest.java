@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.Closeable;
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -20,6 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes unitários para as operações de CRUD e validação de regras de negócio
+ * do serviço de produtos (ProdutoService).
+ */
 public class ProdutoServiceTest {
 
     @Mock
@@ -107,8 +110,7 @@ public class ProdutoServiceTest {
     void atualizar_deveLancarNotFound_quandoNaoExiste() {
         Long idInexistente = 123L;
         when(repository.findByIdOptional(idInexistente)).thenReturn(Optional.empty());
-        ApiException ex = assertThrows(ApiException.class,
-                () -> service.atualizar(idInexistente, new Produto()));
+        assertThrows(ApiException.class, () -> service.atualizar(idInexistente, new Produto()));
     }
 
 

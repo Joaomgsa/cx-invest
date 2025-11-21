@@ -13,6 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes unitários para operações de cliente (ClienteService).
+ * Cobre remoção (soft-delete) e tratamento de cliente inexistente.
+ */
 @ExtendWith(MockitoExtension.class)
 public class ClienteServiceTest {
 
