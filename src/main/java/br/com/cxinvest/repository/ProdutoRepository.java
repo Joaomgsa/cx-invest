@@ -36,4 +36,24 @@ public class ProdutoRepository implements PanacheRepository<Produto> {
         List<Produto> produtos = list("perfilInvestimento.id = ?1", perfilId);
         return produtos == null || produtos.isEmpty() ? Optional.empty() : Optional.of(produtos);
     }
+
+    /**
+     * Lista produtos filtrando pelo nome do perfil de investimento.
+     * <p>
+     * A busca é feita de forma case-insensitive (comparação em lower case) e
+     * valida o parâmetro: se o nome for nulo ou vazio, retorna Optional.empty().
+     *
+     * @param perfilNome nome do perfil de investimento (ex.: "Conservador")
+     * @return Optional com a lista de produtos quando houver resultado, ou Optional.empty()
+     */
+    public Optional<List<Produto>> listarProdutosPorNomePerfil(String perfilNome) {
+        if (perfilNome == null || perfilNome.isBlank()) {
+            return Optional.empty();
+        }
+        String nome = perfilNome.trim().toLowerCase();
+        List<Produto> produtos = list("LOWER(perfilInvestimento.nome) = ?1", nome);
+        return produtos == null || produtos.isEmpty() ? Optional.empty() : Optional.of(produtos);
+    }
+
+
 }

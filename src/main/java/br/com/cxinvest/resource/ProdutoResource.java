@@ -1,7 +1,7 @@
 package br.com.cxinvest.resource;
 
-import br.com.cxinvest.dto.ProdutoRequest;
-import br.com.cxinvest.dto.ProdutoResponse;
+import br.com.cxinvest.dto.produto.ProdutoRequest;
+import br.com.cxinvest.dto.produto.ProdutoResponse;
 import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.service.ProdutoService;

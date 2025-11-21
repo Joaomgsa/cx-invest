@@ -9,12 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
 
 /**
  * Testes unitários para o serviço de métricas (MetricsService).
@@ -37,7 +39,9 @@ public class MetricsServiceTest {
         var s1 = new ServicoTelemetriaResponse("/simulacao", 120, 250);
         var s2 = new ServicoTelemetriaResponse("/perfil-risco", 80, 180);
 
-        when(repository.listarAgregadoPorPeriodo(ini.toInstant(), end.toInstant(), 0, 10)).thenReturn(List.of(s1,s2));
+        // Usar matchers para não depender de instantes fixos (fim agora é determinado dinamicamente)
+        when(repository.listarAgregadoPorPeriodo(any(java.time.Instant.class), any(java.time.Instant.class), eq(0), eq(10)))
+                .thenReturn(List.of(s1,s2));
 
         TelemetriaResponse resp = service.obterTelemetria(null, null, 0, 10);
 
@@ -46,6 +50,9 @@ public class MetricsServiceTest {
         assertEquals("/simulacao", resp.servicos().get(0).nome());
         assertEquals(120, resp.servicos().get(0).quantidadeChamadas());
         assertEquals("2025-10-01", resp.periodo().inicio());
-        assertEquals("2025-10-31", resp.periodo().fim());
+
+        // O serviço agora usa a data atual (UTC) como fim quando não informada; validar dinamicamente
+        String expectedFim = LocalDate.now(ZoneOffset.UTC).toString();
+        assertEquals(expectedFim, resp.periodo().fim());
     }
 }

@@ -95,10 +95,10 @@ public class MetricsService {
                 ? LocalDate.parse(inicio)
                 : LocalDate.parse("2025-10-01");
 
-        // Ajuste: usar o fim padrão fixo 2025-10-31 para manter compatibilidade com testes
+
         LocalDate fimEfetivo = (fim != null && !fim.isBlank())
                 ? LocalDate.parse(fim)
-                : LocalDate.parse("2025-10-31");
+                : LocalDate.now(ZoneOffset.UTC);
 
         OffsetDateTime ini = inicioEfetivo.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime end = fimEfetivo.plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC);

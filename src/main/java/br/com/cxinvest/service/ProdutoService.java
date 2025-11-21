@@ -1,6 +1,7 @@
 package br.com.cxinvest.service;
 
-import br.com.cxinvest.dto.ProdutoResponse;
+import br.com.cxinvest.dto.produto.ProdutoRecomendadoResponse;
+import br.com.cxinvest.dto.produto.Risco;
 import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.repository.PerfilRepository;
@@ -9,8 +10,6 @@ import br.com.cxinvest.exception.ApiException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-
-import org.jboss.logging.Logger;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +20,6 @@ import java.util.Optional;
 @ApplicationScoped
 public class ProdutoService {
 
-    private static final Logger LOG = Logger.getLogger(ProdutoService.class);
 
     @Inject
     ProdutoRepository repository;
@@ -81,16 +79,24 @@ public class ProdutoService {
         repository.removeById(id);
     }
 
-    public List<ProdutoResponse> produtosRecomendadosPerfil(Long perfilId) {
-        var opt = repository.listarProdutosPorPerfil(perfilId);
+
+    public List<ProdutoRecomendadoResponse> produtosRecomendadosPerfilNome(String perfil) {
+
+        var perfilOpt = perfilRepository.findByNomeOptional(perfil);
+        if (perfilOpt.isEmpty()) {
+            throw new ApiException(404, "Perfil não encontrado: " + perfil);
+        }
+
+        var opt = repository.listarProdutosPorNomePerfil(perfil);
         return opt
-                .map(list -> list.stream().map(p -> new ProdutoResponse(
+                .map(list -> list.stream().map(p -> new ProdutoRecomendadoResponse(
                         p.id,
                         p.nome,
                         p.tipo,
                         p.rentabilidadeMensal,
                         p.perfilInvestimento != null ? p.perfilInvestimento.id : null,
-                        p.perfilInvestimento != null ? p.perfilInvestimento.nome : null
+                        p.perfilInvestimento != null ? p.perfilInvestimento.nome : null,
+                        Risco.fromPerfilNome(p.perfilInvestimento != null ? p.perfilInvestimento.nome : null)
                 )).toList())
                 .orElseGet(List::of);
     }

@@ -1,4 +1,4 @@
-package br.com.cxinvest.dto;
+package br.com.cxinvest.dto.produto;
 
 import java.math.BigDecimal;
 import jakarta.validation.constraints.NotBlank;

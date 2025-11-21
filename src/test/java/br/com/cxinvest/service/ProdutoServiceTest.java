@@ -5,6 +5,8 @@ import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.exception.ApiException;
 import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.repository.ProdutoRepository;
+import br.com.cxinvest.dto.produto.Risco;
+import br.com.cxinvest.dto.produto.ProdutoRecomendadoResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -118,5 +121,45 @@ public class ProdutoServiceTest {
     void remover_deveLancarNotFound_quandoNaoExiste() {
         when(repository.findByIdOptional(99L)).thenReturn(Optional.empty());
         assertThrows(ApiException.class, () -> service.remover(99L));
+    }
+
+    // Novo teste: perfil inexistente -> ApiException 404
+    @Test
+    void produtosRecomendadosPerfilNome_deveLancar404_quandoPerfilNaoExiste() {
+        String perfilNome = "INEXISTENTE";
+        when(perfilRepository.findByNomeOptional(perfilNome)).thenReturn(Optional.empty());
+
+        ApiException ex = assertThrows(ApiException.class, () -> service.produtosRecomendadosPerfilNome(perfilNome));
+        assertEquals(404, ex.getHttpCode());
+        assertTrue(ex.getMessage().contains(perfilNome));
+    }
+
+    // Novo teste: perfil existente -> retorna lista de produtos
+    @Test
+    void produtosRecomendadosPerfilNome_deveRetornarProdutos_quandoPerfilExiste() {
+        String perfilNome = "CONSERVADOR";
+        Perfil perfil = new Perfil();
+        perfil.id = 1L;
+        perfil.nome = perfilNome;
+
+        Produto p1 = new Produto();
+        p1.id = 10L;
+        p1.nome = "Produto A";
+        p1.tipo = "Fundo";
+
+        p1.perfilInvestimento = perfil;
+
+        when(perfilRepository.findByNomeOptional(perfilNome)).thenReturn(Optional.of(perfil));
+        when(repository.listarProdutosPorNomePerfil(perfilNome)).thenReturn(Optional.of(List.of(p1)));
+
+        var resp = service.produtosRecomendadosPerfilNome(perfilNome);
+
+        assertNotNull(resp);
+        assertEquals(1, resp.size());
+        var first = resp.stream().findFirst().orElseThrow();
+        assertEquals(p1.nome, first.nome());
+        assertEquals(p1.id, first.id());
+        assertEquals(perfil.id, first.perfilId());
+        assertEquals(Risco.BAIXO, first.risco());
     }
 }

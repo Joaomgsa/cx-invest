@@ -1,6 +1,6 @@
 package br.com.cxinvest.resource;
 
-import br.com.cxinvest.dto.ProdutoResponse;
+import br.com.cxinvest.dto.produto.ProdutoRecomendadoResponse;
 import br.com.cxinvest.service.ProdutoService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -17,11 +17,11 @@ public class ProdutoPerfilResource {
     @Inject
     ProdutoService service;
 
+
     @GET
-    @Path("{perfilId}")
-    public Response produtosRecomendados(@PathParam("perfilId") Long perfilId) {
-        List<ProdutoResponse> produtos = service.produtosRecomendadosPerfil(perfilId);
+    @Path("{perfil}")
+    public Response produtosRecomendadosPorPerfil(@PathParam("perfil") String perfil) {
+        List<ProdutoRecomendadoResponse> produtos = service.produtosRecomendadosPerfilNome(perfil);
         return Response.ok(produtos).build();
     }
-
 }
