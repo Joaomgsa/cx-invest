@@ -146,8 +146,14 @@ public class ClienteService {
     }
 
 
+    /**
+     * Obtém o perfil de risco de um cliente pelo seu ID.
+     * @param cliente_id
+     * @return PerfilRiscoResponse com as informações do perfil de risco
+     */
 
     public PerfilRiscoResponse perfilRiscoCliente(Long cliente_id){
-        return null;
+        return repository.buscarPerfilRisco(cliente_id)
+                .orElseThrow(() -> new NotFoundException("Cliente não encontrado: " + cliente_id));
     }
 }

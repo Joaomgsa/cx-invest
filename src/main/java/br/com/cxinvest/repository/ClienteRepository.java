@@ -33,7 +33,17 @@ public class ClienteRepository implements PanacheRepository<Cliente> {
 
     public Optional<PerfilRiscoResponse> buscarPerfilRisco(Long id) {
         // metodo que busca as informaçoes de perfil do cliente
-        return null;
+        return find("id", id).firstResultOptional()
+                .map(c -> {
+                    if (c.perfilInvestimento == null) {
+                        return new PerfilRiscoResponse(c.id, null, null, null);
+                    }
+                    return new PerfilRiscoResponse(
+                            c.id,
+                            c.perfilInvestimento.nome,
+                            c.perfilInvestimento.pontuacao,
+                            c.perfilInvestimento.descricao
+                    );
+                });
     }
 }
-
