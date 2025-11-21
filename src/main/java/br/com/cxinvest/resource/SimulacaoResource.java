@@ -48,10 +48,4 @@ public class SimulacaoResource {
         return simulacaoService.historico(page, size);
     }
 
-    @POST
-    @Path("/simular")
-    public Response simular(@Valid SimulacaoRequest req) {
-        return Response.ok(simulacaoService.simular(req)).build();
-    }
-
 }
