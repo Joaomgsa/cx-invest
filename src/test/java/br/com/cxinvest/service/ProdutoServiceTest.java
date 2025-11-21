@@ -2,9 +2,9 @@ package br.com.cxinvest.service;
 
 import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
+import br.com.cxinvest.exception.ApiException;
 import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.repository.ProdutoRepository;
-import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,7 +107,7 @@ public class ProdutoServiceTest {
     void atualizar_deveLancarNotFound_quandoNaoExiste() {
         Long idInexistente = 123L;
         when(repository.findByIdOptional(idInexistente)).thenReturn(Optional.empty());
-        NotFoundException ex = assertThrows(NotFoundException.class,
+        ApiException ex = assertThrows(ApiException.class,
                 () -> service.atualizar(idInexistente, new Produto()));
     }
 
@@ -115,6 +115,6 @@ public class ProdutoServiceTest {
     @Test
     void remover_deveLancarNotFound_quandoNaoExiste() {
         when(repository.findByIdOptional(99L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> service.remover(99L));
+        assertThrows(ApiException.class, () -> service.remover(99L));
     }
 }

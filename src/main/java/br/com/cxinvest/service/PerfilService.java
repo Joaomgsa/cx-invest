@@ -4,10 +4,12 @@ import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.entity.Enum.FrequenciaInvestimento;
 import br.com.cxinvest.entity.Enum.PreferenciaInvestimento;
+import br.com.cxinvest.exception.ApiException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
+
+import org.jboss.logging.Logger;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +29,7 @@ import java.math.BigDecimal;
 @ApplicationScoped
 public class PerfilService {
 
+    private static final Logger LOG = Logger.getLogger(PerfilService.class);
 
     //TODO: adicionar soft delete para nao perder histórico de perfis vinculados a produtos e clientes
     @Inject
@@ -65,13 +68,13 @@ public class PerfilService {
      * @param id identificador do perfil a ser atualizado
      * @param perfilAtualizado objeto contendo os novos valores
      * @return o perfil atualizado
-     * @throws NotFoundException se o perfil não existir
+     * @throws ApiException se o perfil não existir
      */
     @Transactional
     public Perfil atualizar(Long id, Perfil perfilAtualizado) {
         Optional<Perfil> existenteOpt = repository.findByIdOptional(id);
         if (existenteOpt.isEmpty()) {
-            throw new NotFoundException("Perfil não encontrado: " + id);
+            throw new ApiException(404, "Perfil não encontrado: " + id);
         }
         Perfil existente = existenteOpt.get();
         existente.nome = perfilAtualizado.nome;
@@ -84,13 +87,13 @@ public class PerfilService {
     /**
      * Remove um perfil.
      * @param id identificador do perfil a remover
-     * @throws NotFoundException se o perfil não existir
+     * @throws ApiException se o perfil não existir
      */
     @Transactional
     public void remover(Long id) {
         Optional<Perfil> existenteOpt = repository.findByIdOptional(id);
         if (existenteOpt.isEmpty()) {
-            throw new NotFoundException("Perfil não encontrado: " + id);
+            throw new ApiException(404, "Perfil não encontrado: " + id);
         }
         repository.removeById(id);
     }
@@ -100,7 +103,7 @@ public class PerfilService {
      * total investido, frequência de investimento e preferência.
      *
      * Regras (resumidas):
-     * - totalInvestido é avaliado contra thresholds (1k, 3k) para atribuir weight
+     * - totalInvestido é avaliado contra thresholds (5k, 50k) para atribuir weight
      * - soma dos pesos (total + frequência + preferência) resulta em um score
      * - score <=1 -> CONSERVADOR, <=3 -> MODERADO, >3 -> AGRESSIVO
      *
@@ -108,7 +111,7 @@ public class PerfilService {
      * @param frequencia frequência de investimento (pode ser null, usa MEDIA)
      * @param preferencia preferência de investimento (pode ser null, usa LIQUIDEZ)
      * @return Perfil encontrado correspondente às regras
-     * @throws NotFoundException se não houver perfil cadastrado com o nome calculado
+     * @throws ApiException se não houver perfil cadastrado com o nome calculado
      */
     public Perfil definirPerfilCliente(BigDecimal totalInvestido, FrequenciaInvestimento frequencia, PreferenciaInvestimento preferencia) {
         final var tv = (totalInvestido == null) ? BigDecimal.ZERO : totalInvestido;
@@ -134,6 +137,6 @@ public class PerfilService {
         String perfilNome = score <= 1 ? "CONSERVADOR" : score <= 3 ? "MODERADO" : "AGRESSIVO";
 
         Optional<Perfil> perfilOpt = repository.find("nome", perfilNome).firstResultOptional();
-        return perfilOpt.orElseThrow(() -> new NotFoundException("Perfil não encontrado: " + perfilNome));
+        return perfilOpt.orElseThrow(() -> new ApiException(404, "Perfil não encontrado: " + perfilNome));
     }
 }

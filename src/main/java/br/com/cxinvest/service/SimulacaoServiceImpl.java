@@ -11,10 +11,11 @@ import br.com.cxinvest.entity.Simulacao;
 import br.com.cxinvest.repository.SimulacaoRepository;
 import br.com.cxinvest.repository.ClienteRepository;
 import br.com.cxinvest.entity.Enum.TipoProduto;
+import br.com.cxinvest.exception.ApiException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
+
+import org.jboss.logging.Logger;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,8 @@ public class SimulacaoServiceImpl implements SimulacaoService {
     @Inject
     ClienteRepository clienteRepository;
 
+    private static final Logger LOG = Logger.getLogger(SimulacaoServiceImpl.class);
+
     /*
         * Método de simulação de investimento.
         *    Etapas da simulação (não implementadas):
@@ -47,21 +50,21 @@ public class SimulacaoServiceImpl implements SimulacaoService {
     @Override
     public SimulacaoResponse simular(SimulacaoRequest simulacaoRequest) {
         if (simulacaoRequest == null) {
-            throw new BadRequestException("Requisição de simulação inválida");
+            throw new ApiException(400, "Requisição de simulação inválida");
         }
 
         // 1) validar tipo de produto informado
         var tipoOpt = validarProduto(simulacaoRequest.tipoProduto());
         if (tipoOpt.isEmpty()) {
-            throw new BadRequestException("Tipo de produto inválido: " + simulacaoRequest.tipoProduto());
+            throw new ApiException(400, "Tipo de produto inválido: " + simulacaoRequest.tipoProduto());
         }
 
         // 2) recuperar produtos pelo tipo e escolher um (modelo simples: primeiro da lista)
         List<Produto> produtos = repository.findProdutosByTipo(simulacaoRequest.tipoProduto());
         if (produtos == null || produtos.isEmpty()) {
-            throw new NotFoundException("Nenhum produto encontrado para o tipo: " + simulacaoRequest.tipoProduto());
+            throw new ApiException(404, "Nenhum produto encontrado para o tipo: " + simulacaoRequest.tipoProduto());
         }
-        Produto produto = produtos.stream().findFirst().orElseThrow(() -> new NotFoundException("Nenhum produto encontrado para o tipo: " + simulacaoRequest.tipoProduto()));
+        Produto produto = produtos.stream().findFirst().orElseThrow(() -> new ApiException(404, "Nenhum produto encontrado para o tipo: " + simulacaoRequest.tipoProduto()));
 
         // 3) verificar se o produto é adequado ao perfil do cliente
         validarPerfilProduto(produto.id, simulacaoRequest.clienteId());
@@ -80,7 +83,7 @@ public class SimulacaoServiceImpl implements SimulacaoService {
 
         // persistir simulação
         var clienteOpt = clienteRepository.findByIdOptional(simulacaoRequest.clienteId());
-        var cliente = clienteOpt.orElseThrow(() -> new NotFoundException("Cliente não encontrado: " + simulacaoRequest.clienteId()));
+        var cliente = clienteOpt.orElseThrow(() -> new ApiException(404, "Cliente não encontrado: " + simulacaoRequest.clienteId()));
 
         var simulacao = new Simulacao();
         simulacao.produto = produto;
@@ -161,10 +164,10 @@ public class SimulacaoServiceImpl implements SimulacaoService {
         var clienteOpt = clienteRepository.findByIdOptional(clienteId);
 
         if (produtoOpt.isEmpty()) {
-            throw new NotFoundException("Produto não encontrado: " + produtoId);
+            throw new ApiException(404, "Produto não encontrado: " + produtoId);
         }
         if (clienteOpt.isEmpty()) {
-            throw new NotFoundException("Cliente não encontrado: " + clienteId);
+            throw new ApiException(404, "Cliente não encontrado: " + clienteId);
         }
 
         var produto = produtoOpt.get();
@@ -174,7 +177,7 @@ public class SimulacaoServiceImpl implements SimulacaoService {
         Long perfilClienteId = cliente.perfilInvestimento != null ? cliente.perfilInvestimento.id : null;
 
         if (!Objects.equals(perfilProdutoId, perfilClienteId)) {
-            throw new BadRequestException("este produto nao é adequado ao perfil do cliente");
+            throw new ApiException(400, "este produto nao é adequado ao perfil do cliente");
         }
     }
 

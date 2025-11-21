@@ -4,9 +4,11 @@ import br.com.cxinvest.dto.cliente.HistoricoInvestimentoResponse;
 import br.com.cxinvest.entity.Investimento;
 import br.com.cxinvest.repository.InvestimentoRepository;
 import br.com.cxinvest.repository.ClienteRepository;
+import br.com.cxinvest.exception.ApiException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.NotFoundException;
+
+import org.jboss.logging.Logger;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.Objects;
 
 @ApplicationScoped
 public class InvestimentoService {
+
+    private static final Logger LOG = Logger.getLogger(InvestimentoService.class);
 
     @Inject
     InvestimentoRepository repository;
@@ -23,7 +27,7 @@ public class InvestimentoService {
 
     /**
      * Retorna histórico de investimentos de um cliente paginado e ordenado por data.
-     * Valida existência do cliente e lança NotFoundException (404) quando não encontrado.
+     * Valida existência do cliente e lança ApiException(404) quando não encontrado.
      * @param clienteId id do cliente
      * @param page número da página (0-based)
      * @param size tamanho da página
@@ -32,11 +36,11 @@ public class InvestimentoService {
      */
     public List<HistoricoInvestimentoResponse> listarHistoricoInvestimentosCliente(Long clienteId, int page, int size, boolean asc) {
         if (Objects.isNull(clienteId)) {
-            throw new NotFoundException("Cliente não encontrado: null");
+            throw new ApiException(404, "Cliente não encontrado: null");
         }
         var clienteOpt = clienteRepository.findByIdOptional(clienteId);
         if (clienteOpt.isEmpty()) {
-            throw new NotFoundException("Cliente não encontrado: " + clienteId);
+            throw new ApiException(404, "Cliente não encontrado: " + clienteId);
         }
 
         List<Investimento> lista = repository.listarPorCliente(clienteId, page, size, asc);

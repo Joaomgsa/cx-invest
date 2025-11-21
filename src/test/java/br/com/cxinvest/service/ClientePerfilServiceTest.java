@@ -3,6 +3,7 @@ package br.com.cxinvest.service;
 import br.com.cxinvest.entity.Cliente;
 import br.com.cxinvest.entity.ClientePerfilHistorico;
 import br.com.cxinvest.entity.Perfil;
+import br.com.cxinvest.exception.ApiException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,7 +93,7 @@ public class ClientePerfilServiceTest {
     }
 
     /**
-     * Cenário de erro: cliente nulo deve lançar NullPointerException e
+     * Cenário de erro: cliente nulo deve lançar ApiException(400) e
      * não interagir com o EntityManager.
      */
     @Test
@@ -102,7 +103,8 @@ public class ClientePerfilServiceTest {
         novo.nome = "CONSERVADOR";
         novo.pontuacao = 10;
 
-        assertThrows(NullPointerException.class, () -> service.aplicarDecisaoDePerfil(null, novo, "m", null));
+        ApiException ex = assertThrows(ApiException.class, () -> service.aplicarDecisaoDePerfil(null, novo, "m", null));
+        assertTrue(ex.getMessage().contains("Cliente é obrigatório"));
         verifyNoInteractions(em);
     }
 
@@ -124,10 +126,11 @@ public class ClientePerfilServiceTest {
 
         doThrow(new RuntimeException("DB error")).when(em).persist(any());
 
-        RuntimeException ex = assertThrows(RuntimeException.class,
+        ApiException ex = assertThrows(ApiException.class,
                 () -> service.aplicarDecisaoDePerfil(cliente, novo, "motivo", "meta"));
 
-        assertEquals("DB error", ex.getMessage());
+        assertTrue(ex.getMessage().contains("Falha ao aplicar decisão de perfil"));
+        assertTrue(ex.getMessage().contains("DB error"));
         // merge não deve ser chamado quando persist lançar
         verify(em, never()).merge(any());
     }

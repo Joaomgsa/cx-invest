@@ -5,10 +5,12 @@ import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.repository.ProdutoRepository;
+import br.com.cxinvest.exception.ApiException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
+
+import org.jboss.logging.Logger;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +20,8 @@ import java.util.Optional;
 
 @ApplicationScoped
 public class ProdutoService {
+
+    private static final Logger LOG = Logger.getLogger(ProdutoService.class);
 
     @Inject
     ProdutoRepository repository;
@@ -37,11 +41,11 @@ public class ProdutoService {
     @Transactional
     public Produto criar(Produto produto) {
         if (produto.perfilInvestimento == null || produto.perfilInvestimento.id == null) {
-            throw new IllegalArgumentException("perfilId é obrigatório");
+            throw new ApiException(400, "perfilId é obrigatório");
         }
         Optional<Perfil> perfilOpt = perfilRepository.findByIdOptional(produto.perfilInvestimento.id);
         if (perfilOpt.isEmpty()) {
-            throw new NotFoundException("Perfil não encontrado: " + produto.perfilInvestimento.id);
+            throw new ApiException(404, "Perfil não encontrado: " + produto.perfilInvestimento.id);
         }
         produto.perfilInvestimento = perfilOpt.get();
         repository.persistProduto(produto);
@@ -51,17 +55,17 @@ public class ProdutoService {
     @Transactional
     public Produto atualizar(Long id, Produto produtoAtualizado) {
         Produto existente = repository.findByIdOptional(id)
-                .orElseThrow(() -> new NotFoundException("Produto não encontrado: " + id));
+                .orElseThrow(() -> new ApiException(404, "Produto não encontrado: " + id));
 
         existente.nome = produtoAtualizado.nome;
         existente.tipo = produtoAtualizado.tipo;
         existente.rentabilidadeMensal = produtoAtualizado.rentabilidadeMensal;
         if (produtoAtualizado.perfilInvestimento == null || produtoAtualizado.perfilInvestimento.id == null) {
-            throw new IllegalArgumentException("perfilId é obrigatório");
+            throw new ApiException(400, "perfilId é obrigatório");
         }
         Optional<Perfil> perfilOpt = perfilRepository.findByIdOptional(produtoAtualizado.perfilInvestimento.id);
         if (perfilOpt.isEmpty()) {
-            throw new NotFoundException("Perfil não encontrado: " + produtoAtualizado.perfilInvestimento.id);
+            throw new ApiException(404, "Perfil não encontrado: " + produtoAtualizado.perfilInvestimento.id);
         }
         existente.perfilInvestimento = perfilOpt.get();
         repository.persist(existente);
@@ -72,7 +76,7 @@ public class ProdutoService {
     public void remover(Long id) {
         Optional<Produto> existenteOpt = repository.findByIdOptional(id);
         if (existenteOpt.isEmpty()) {
-            throw new NotFoundException("Produto não encontrado: " + id);
+            throw new ApiException(404, "Produto não encontrado: " + id);
         }
         repository.removeById(id);
     }

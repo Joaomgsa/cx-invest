@@ -5,10 +5,9 @@ import br.com.cxinvest.dto.simulacao.SimulacaoResponse;
 import br.com.cxinvest.entity.Cliente;
 import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
+import br.com.cxinvest.exception.ApiException;
 import br.com.cxinvest.repository.ClienteRepository;
 import br.com.cxinvest.repository.SimulacaoRepository;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,7 +93,7 @@ public class SimulacaoServiceImplTest {
     @Test
     public void simular_deveLancarBadRequest_quandoTipoInvalido() {
         var req = new SimulacaoRequest(1L, new BigDecimal("1000"), 12, "INVALID");
-        BadRequestException ex = assertThrows(BadRequestException.class, () -> service.simular(req));
+        ApiException ex = assertThrows(ApiException.class, () -> service.simular(req));
         assertTrue(ex.getMessage().contains("Tipo de produto inválido"));
     }
 
@@ -102,7 +101,7 @@ public class SimulacaoServiceImplTest {
     public void simular_deveLancarNotFound_quandoNenhumProdutoEncontradoParaTipo() {
         when(repository.findProdutosByTipo("CDB")).thenReturn(List.of());
         var req = new SimulacaoRequest(1L, new BigDecimal("1000"), 12, "CDB");
-        NotFoundException ex = assertThrows(NotFoundException.class, () -> service.simular(req));
+        ApiException ex = assertThrows(ApiException.class, () -> service.simular(req));
         assertTrue(ex.getMessage().contains("Nenhum produto encontrado"));
     }
 
@@ -118,8 +117,7 @@ public class SimulacaoServiceImplTest {
         when(clienteRepository.findByIdOptional(1L)).thenReturn(Optional.of(cliente));
 
         var req = new SimulacaoRequest(1L, new BigDecimal("1000"), 12, "CDB");
-        BadRequestException ex = assertThrows(BadRequestException.class, () -> service.simular(req));
+        ApiException ex = assertThrows(ApiException.class, () -> service.simular(req));
         assertEquals("este produto nao é adequado ao perfil do cliente", ex.getMessage());
     }
 }
-

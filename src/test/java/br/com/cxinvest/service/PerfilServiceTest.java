@@ -1,11 +1,11 @@
 package br.com.cxinvest.service;
 
 import br.com.cxinvest.entity.Perfil;
+import br.com.cxinvest.exception.ApiException;
 import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.entity.Enum.FrequenciaInvestimento;
 import br.com.cxinvest.entity.Enum.PreferenciaInvestimento;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
-import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,6 +92,6 @@ public class PerfilServiceTest {
         when(repository.find(anyString(), (Object[]) any())).thenReturn(query);
         when(query.firstResultOptional()).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> service.definirPerfilCliente(new BigDecimal("5000"), FrequenciaInvestimento.ALTA, PreferenciaInvestimento.RENTABILIDADE));
+        assertThrows(ApiException.class, () -> service.definirPerfilCliente(new BigDecimal("5000"), FrequenciaInvestimento.ALTA, PreferenciaInvestimento.RENTABILIDADE));
     }
 }

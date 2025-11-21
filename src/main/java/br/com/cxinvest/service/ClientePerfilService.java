@@ -4,10 +4,13 @@ package br.com.cxinvest.service;
 import br.com.cxinvest.entity.Cliente;
 import br.com.cxinvest.entity.ClientePerfilHistorico;
 import br.com.cxinvest.entity.Perfil;
+import br.com.cxinvest.exception.ApiException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+
+import org.jboss.logging.Logger;
 
 
 /**
@@ -17,6 +20,8 @@ import jakarta.transaction.Transactional;
  */
 @ApplicationScoped
 public class ClientePerfilService {
+
+    private static final Logger LOG = Logger.getLogger(ClientePerfilService.class);
 
     @Inject
     EntityManager em;
@@ -31,7 +36,7 @@ public class ClientePerfilService {
      * - Atualiza (merge) a entidade Cliente com o novo perfil.
      *
      * Observações:
-     * - Lança NullPointerException se cliente for nulo.
+     * - Lança ApiException(400) se cliente for nulo.
      * - Aceita novoPerfil nulo (por exemplo, para remoção do perfil); nesse caso
      *   a pontuação armazenada no histórico será null.
      *
@@ -42,6 +47,10 @@ public class ClientePerfilService {
      */
     @Transactional
     public void aplicarDecisaoDePerfil(Cliente cliente, Perfil novoPerfil, String motivo, String metadata) {
+        if (cliente == null) {
+            throw new ApiException(400, "Cliente é obrigatório para aplicar decisão de perfil");
+        }
+
         Perfil anterior = cliente.perfilInvestimento;
         ClientePerfilHistorico historico = new ClientePerfilHistorico(
                 cliente,
@@ -51,9 +60,16 @@ public class ClientePerfilService {
                 metadata,
                 novoPerfil != null ? novoPerfil.pontuacao : null
         );
-        em.persist(historico);
 
-        cliente.setPerfil(novoPerfil);
-        em.merge(cliente);
+        try {
+            em.persist(historico);
+            cliente.setPerfil(novoPerfil);
+            em.merge(cliente);
+        } catch (Exception e) {
+            // log the stacktrace for debugging and audit
+            LOG.error("Erro ao persistir decisão de perfil para cliente id=" + (cliente != null ? cliente.id : null), e);
+            // encapsula erro de persistência em ApiException para resposta HTTP consistente
+            throw new ApiException(500, "Falha ao aplicar decisão de perfil: " + e.getMessage());
+        }
     }
 }
