@@ -278,7 +278,7 @@ QUARKUS_OIDC_CREDENTIALS_SECRET=<secret-gerado-pelo-keycloak>
 QUARKUS_OIDC_TLS_VERIFICATION=required
 ```
 
-### Recomendações de Segurança
+### Recomendações de Segurança - (Para Versão de Produção em novas releases)
 
 1. **Tokens**: Configure expiração adequada (ex: 15-30 minutos)
 2. **Refresh Tokens**: Use para renovação sem re-autenticação

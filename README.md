@@ -1,205 +1,158 @@
-# cx-invest
+# cx-invest - Plataforma de Recomendação de Investimentos
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+As definiçoes de API, arquitetura e segurança estão detalhadas no arquivo `projeto.md`.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+Este projeto utiliza Quarkus, o framework Java Supersônico e Subatômico.
 
-## Security
+Se quiser saber mais sobre Quarkus, visite: <https://quarkus.io/>.
 
-This application uses Keycloak for authentication and authorization with role-based access control (RBAC).
+## Documentação do projeto
 
-**Quick Start with Security:**
+As definições e a documentação de arquitetura do projeto estão no arquivo `projeto.md` na raiz do repositório. Consulte esse arquivo para detalhes sobre Estrutura da API, Motor de Recomendação, Segurança e Testes.
 
-```bash
-# Start Keycloak
+## Segurança
+
+Esta aplicação utiliza o Keycloak para autenticação e autorização com controle por papéis (RBAC).
+
+**Quick Start com Segurança:**
+
+```powershell
+# Iniciar o Keycloak (via docker-compose, se configurado)
 docker-compose up -d keycloak
 
-# Wait for Keycloak to be ready (check logs)
+# Aguardar o Keycloak ficar pronto (ver logs)
 docker logs -f keycloak
 
-# Run the application
+# Executar a aplicação em modo dev
 ./mvnw quarkus:dev
 ```
 
-**Test users:**
-- Admin: `admin` / `admin123` (full access)
-- Analista: `analista` / `analista123` (read access to reports)
-- Cliente: `cliente` / `cliente123` (restricted to own resources)
+**Usuários de teste:**
+- Admin: `admin` / `admin123` (acesso completo)
+- Analista: `analista` / `analista123` (acesso de leitura para relatórios)
+- Cliente: `cliente` / `cliente123` (acesso restrito aos próprios recursos)
 
-For complete security documentation, see [SECURITY.md](SECURITY.md).
+Para a documentação completa sobre segurança, veja `SECURITY.md`.
 
-## Running the application in dev mode
+## Executando a aplicação em modo dev
 
-You can run your application in dev mode that enables live coding using:
+Você pode executar a aplicação no modo de desenvolvimento (live coding) com:
 
-```shell script
+```powershell
 ./mvnw quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+> **OBS:** A Dev UI do Quarkus fica disponível somente em modo dev em <http://localhost:8080/q/dev/>.
 
-## Packaging and running the application
+## Empacotando e executando a aplicação
 
-The application can be packaged using:
+Empacete a aplicação:
 
-```shell script
+```powershell
 ./mvnw package
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+Isso produz o arquivo `quarkus-run.jar` em `target/quarkus-app/`.
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+Execute com:
 
-If you want to build an _über-jar_, execute the following command:
+```powershell
+java -jar target/quarkus-app/quarkus-run.jar
+```
 
-```shell script
+Para criar um "über-jar":
+
+```powershell
 ./mvnw package -Dquarkus.package.jar.type=uber-jar
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+O artefato gerado estará em `target/*-runner.jar`.
 
-## Creating a native executable
+## Gerando um executável nativo
 
-You can create a native executable using:
-
-```shell script
+```powershell
 ./mvnw package -Dnative
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+Ou em container (se não tiver GraalVM localmente):
 
-```shell script
+```powershell
 ./mvnw package -Dnative -Dquarkus.native.container-build=true
 ```
 
-You can then execute your native executable with: `./target/cx-invest-1.0.0-SNAPSHOT-runner`
+Execute o binário nativo:
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+```powershell
+./target/cx-invest-1.0.0-SNAPSHOT-runner
+```
 
-## Related Guides
+## Guias relacionados
 
-- OpenAPI Generator - REST Client Generator ([guide](https://docs.quarkiverse.io/quarkus-openapi-generator/dev/index.html)): Generation of Rest Clients based on OpenAPI specification files
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- OpenAPI Generator - REST Server Generator ([guide](https://docs.quarkiverse.io/quarkus-openapi-generator/dev/index.html)): Provides personalized code generation to get started in a Server project 
-- OpenTelemetry ([guide](https://quarkus.io/guides/opentelemetry)): Use OpenTelemetry to trace services
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- SmallRye JWT ([guide](https://quarkus.io/guides/security-jwt)): Secure your applications with JSON Web Token
+- OpenAPI Generator - REST Client Generator: https://docs.quarkiverse.io/quarkus-openapi-generator/dev/index.html
+- REST (Quarkus): https://quarkus.io/guides/rest
+- OpenTelemetry: https://quarkus.io/guides/opentelemetry
+- Hibernate ORM com Panache: https://quarkus.io/guides/hibernate-orm-panache
+- SmallRye JWT: https://quarkus.io/guides/security-jwt
 
-## Provided Code
+## Código fornecido
 
 ### Hibernate ORM
 
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
+Crie sua primeira entidade JPA — ver guias do Quarkus acima.
 
 ### OpenAPI Generator Client Codestart
 
-Start to code with the OpenAPI Generator Client extension.
+Veja o guia do OpenAPI Generator para clientes/servidor se precisar gerar código.
 
-[Related guide section...](https://docs.quarkiverse.io/quarkus-openapi-generator/dev/client.html)
+## Requisitos
 
-## Requirements
+Certifique-se de ter as extensões necessárias adicionadas ao projeto. Exemplos:
 
-If you do not have added the `io.quarkus:quarkus-rest-client-jackson` or `io.quarkus:quarkus-rest-client-reactive-jackson` extension in your project, add it first:
+Para adicionar OpenAPI (SmallRye OpenAPI):
 
-Remember, you just need to add one of them, depending on your needs.
-
-### REST Client Jackson:
-
-Quarkus CLI:
-
-```bash
-quarkus ext add io.quarkus:quarkus-rest-client-jackson
-```
-
-Maven:
-```bash
-./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-rest-client-jackson"
-```
-
-Gradle:
-
-```bash
-./gradlew addExtension --extensions="io.quarkus:quarkus-rest-client-jackson"
-```
-
-or
-
-### REST Client Reactive Jackson:
-
-Quarkus CLI:
-
-```bash
-quarkus ext add io.quarkus:quarkus-rest-client-reactive-jackson
-```
-
-Maven:
-
-```bash
-./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-rest-client-reactive-jackson"
-```
-
-Gradle:
-
-```bash
-./gradlew addExtension --extensions="io.quarkus:quarkus-rest-client-reactive-jackson"
-```
-### OpenAPI Generator Server
-
-This codestart generates a simple API with OpenAPI documentation.
-
-[Related guide section...](https://docs.quarkiverse.io/quarkus-openapi-generator/dev/server.html)
-
-## Requirements
-
-If you do not have added the `io.quarkus:quarkus-smallrye-openapi` extension in your project, add it first:
-
-### SmallRye OpenAPI:
-
-Quarkus CLI:
-
-```bash
+```powershell
+# Quarkus CLI
 quarkus ext add io.quarkus:quarkus-smallrye-openapi
-```
 
-Maven:
-```bash
+# Ou via Maven
 ./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-smallrye-openapi"
 ```
 
-Gradle:
+Para adicionar o REST Client Jackson (se necessário):
 
-```bash
-./gradlew addExtension --extensions="io.quarkus:quarkus-smallrye-openapi"
+```powershell
+./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-rest-client-jackson"
 ```
-### REST
 
-Easily start your REST Web Services
+## Executando testes (JDK 21)
 
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+Este projeto é ajustado para Java 21. Antes de executar, ajuste `JAVA_HOME` para o JDK 21.
 
-### RESTEasy JAX-RS
+Verifique versões:
 
-Easily start your RESTful Web Services
+```powershell
+mvn -v
+java -version
+```
 
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+Executar em modo dev:
 
-## Instruções rápidas (JDK 21)
+```powershell
+./mvnw quarkus:dev
+```
 
-Esta aplicação foi ajustada para Java 21. Para executar localmente:
+Executar todos os testes:
 
-- Instale o JDK 21 e aponte JAVA_HOME para ele.
-- Verifique versões:
-  - mvn -v
-  - java -version
-- Em dev (live coding):
-  - ./mvnw quarkus:dev
-- Para empacotar:
-  - ./mvnw package
+```powershell
+mvn test
+```
 
-Se preferir, utilize a variável de ambiente JAVA_HOME apontando para o JDK 21 ao executar os comandos acima.
+Executar apenas testes de integração (se aplicável):
+
+```powershell
+mvn -Dtest=*IntegrationTest test
+```
+
+---
+
+
