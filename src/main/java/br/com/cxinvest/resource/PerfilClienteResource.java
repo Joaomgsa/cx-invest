@@ -2,6 +2,7 @@ package br.com.cxinvest.resource;
 
 
 import br.com.cxinvest.service.ClienteService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -19,6 +20,7 @@ public class PerfilClienteResource {
 
     @GET
     @Path("{clienteId}")
+    @RolesAllowed({"admin", "analista", "cliente"})
     public Response perfilRiscoCliente(@PathParam("clienteId")  Long clienteId) {
         var perfil = service.perfilRiscoCliente(clienteId);
         return Response.ok(perfil).build();

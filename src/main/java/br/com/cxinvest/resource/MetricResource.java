@@ -2,6 +2,7 @@ package br.com.cxinvest.resource;
 
 import br.com.cxinvest.dto.telemetria.TelemetriaResponse;
 import br.com.cxinvest.service.MetricsService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -16,6 +17,7 @@ public class MetricResource {
     MetricsService service;
 
     @GET
+    @RolesAllowed({"admin", "analista"})
     public Response getTelemetria(
             @QueryParam("inicio") String inicio,
             @QueryParam("fim") String fim,

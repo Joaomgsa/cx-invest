@@ -2,6 +2,7 @@ package br.com.cxinvest.resource;
 
 import br.com.cxinvest.dto.ProdutoResponse;
 import br.com.cxinvest.service.ProdutoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -19,6 +20,7 @@ public class ProdutoPerfilResource {
 
     @GET
     @Path("{perfilId}")
+    @RolesAllowed({"admin", "analista", "cliente"})
     public Response produtosRecomendados(@PathParam("perfilId") Long perfilId) {
         List<ProdutoResponse> produtos = service.produtosRecomendadosPerfil(perfilId);
         return Response.ok(produtos).build();

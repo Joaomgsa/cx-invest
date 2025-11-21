@@ -1,0 +1,113 @@
+{
+  "realm": "cx-invest",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 3600,
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administrador com acesso total ao sistema"
+      },
+      {
+        "name": "analista",
+        "description": "Analista com acesso a relatórios e leitura de dados"
+      },
+      {
+        "name": "cliente",
+        "description": "Cliente com acesso restrito aos próprios recursos"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "cx-invest-backend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "cx-invest-frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "redirectUris": ["http://localhost:*"],
+      "webOrigins": ["*"],
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@cxinvest.com",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"]
+    },
+    {
+      "username": "analista",
+      "enabled": true,
+      "email": "analista@cxinvest.com",
+      "emailVerified": true,
+      "firstName": "Analista",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "analista123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["analista"]
+    },
+    {
+      "username": "cliente",
+      "enabled": true,
+      "email": "cliente@cxinvest.com",
+      "emailVerified": true,
+      "firstName": "Cliente",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "cliente123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["cliente"],
+      "attributes": {
+        "clienteId": ["1"]
+      }
+    }
+  ]
+}
