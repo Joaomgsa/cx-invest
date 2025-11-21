@@ -120,13 +120,11 @@ public class SimulacaoServiceImpl implements SimulacaoService {
         List<br.com.cxinvest.entity.Simulacao> sims = repository.buscarTodos(page, size);
         return sims.stream().map(s -> new SimulacaoHistoricoResponse(
                 s.id,
-                s.produto != null ? s.produto.id : null,
-                s.produto != null ? s.produto.nome : null,
                 s.cliente != null ? s.cliente.id : null,
+                s.produto != null ? s.produto.nome : null,
                 s.valorSimulacao,
                 s.valorFinal,
                 s.prazoMeses,
-                s.rentabilidadeEfetiva,
                 s.dataSimulacao != null ? s.dataSimulacao.toString() : null
         )).toList();
     }

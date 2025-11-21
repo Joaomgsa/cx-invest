@@ -7,9 +7,9 @@ import java.time.LocalDate;
  * DTO de agregação diária por produto para relatório de simulações.
  */
 public record SimulacaoProdutoDiaResponse(
-        String produtoNome,
+        String produto,
         LocalDate data,
-        Long totalSimulacoes,
+        Long quantidadeSimulacoes,
         BigDecimal mediaValorFinal
 ) {
 }

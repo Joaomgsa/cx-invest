@@ -8,13 +8,11 @@ import java.time.Instant;
  */
 public record SimulacaoHistoricoResponse(
         Long id,
-        Long produtoId,
-        String produtoNome,
         Long clienteId,
-        BigDecimal valorSimulacao,
+        String produto,
+        BigDecimal valorInvestido,
         BigDecimal valorFinal,
         Integer prazoMeses,
-        BigDecimal rentabilidadeEfetiva,
         String dataSimulacao
 ) {
 }
