@@ -4,6 +4,7 @@ import br.com.cxinvest.dto.simulacao.SimulacaoHistoricoResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoProdutoDiaResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoRequest;
 import br.com.cxinvest.service.SimulacaoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -28,6 +29,7 @@ public class SimulacaoResource {
      */
     @GET
     @Path("/por-produto-dia")
+    @RolesAllowed({"admin", "analista"})
     public List<SimulacaoProdutoDiaResponse> porProdutoDia(
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("10") int size
@@ -41,6 +43,7 @@ public class SimulacaoResource {
      */
     @GET
     @Path("/")
+    @RolesAllowed({"admin", "analista"})
     public List<SimulacaoHistoricoResponse> historico(
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("10") int size

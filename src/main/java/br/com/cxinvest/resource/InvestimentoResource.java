@@ -2,6 +2,7 @@ package br.com.cxinvest.resource;
 
 import br.com.cxinvest.dto.cliente.HistoricoInvestimentoResponse;
 import br.com.cxinvest.service.InvestimentoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -23,6 +24,7 @@ public class InvestimentoResource {
 
     @GET
     @Path("{clienteId}")
+    @RolesAllowed({"admin", "analista", "cliente"})
     public Response listarHistorico(@PathParam("clienteId") Long clienteId,
                                    @QueryParam("page") @DefaultValue("0") int page,
                                    @QueryParam("size") @DefaultValue("10") int size,

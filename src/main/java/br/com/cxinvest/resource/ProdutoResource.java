@@ -5,6 +5,7 @@ import br.com.cxinvest.dto.ProdutoResponse;
 import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.service.ProdutoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -22,18 +23,21 @@ public class ProdutoResource {
     ProdutoService service;
 
     @GET
+    @RolesAllowed({"admin", "analista", "cliente"})
     public List<ProdutoResponse> listar() {
         return service.listarTodos().stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     @GET
     @Path("{id}")
+    @RolesAllowed({"admin", "analista", "cliente"})
     public Response buscar(@PathParam("id") Long id) {
         return service.buscarPorId(id).map(p -> Response.ok(toResponse(p)).build())
                 .orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @POST
+    @RolesAllowed("admin")
     public Response criar(ProdutoRequest req) {
         Produto produto = toEntity(req);
         Produto criado = service.criar(produto);
@@ -42,6 +46,7 @@ public class ProdutoResource {
 
     @PUT
     @Path("{id}")
+    @RolesAllowed("admin")
     public Response atualizar(@PathParam("id") Long id, ProdutoRequest req) {
         Produto produto = toEntity(req);
         Produto atualizado = service.atualizar(id, produto);
@@ -50,6 +55,7 @@ public class ProdutoResource {
 
     @DELETE
     @Path("{id}")
+    @RolesAllowed("admin")
     public Response remover(@PathParam("id") Long id) {
         service.remover(id);
         return Response.noContent().build();

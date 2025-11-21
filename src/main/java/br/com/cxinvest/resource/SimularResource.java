@@ -4,6 +4,7 @@ import br.com.cxinvest.dto.simulacao.SimulacaoHistoricoResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoProdutoDiaResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoRequest;
 import br.com.cxinvest.service.SimulacaoService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -24,6 +25,7 @@ public class SimularResource {
 
     @POST
     @Path("/simular-investimento")
+    @RolesAllowed({"admin", "analista", "cliente"})
     public Response simular(@Valid SimulacaoRequest req) {
         return Response.ok(simulacaoService.simular(req)).build();
     }
