@@ -1,45 +1,25 @@
 version: "3.8"
+
 services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:23.0.0
-    container_name: keycloak
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KC_DB=dev-file
-    command:
-      - start-dev
-      - --import-realm
-    volumes:
-      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+  app:
+    build: .
+    image: cx-invest:latest
+    container_name: cx-invest-app
     ports:
-      - "8180:8080"
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: "jdbc:sqlite:/data/cx-invest.db"
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "drop-and-create"
+      QUARKUS_OIDC_AUTH_SERVER_URL: "http://host.docker.internal:8180/realms/cx-invest"
+      QUARKUS_OIDC_CLIENT_ID: "cx-invest-backend"
+      QUARKUS_OIDC_CREDENTIALS_SECRET: "secret"
+      QUARKUS_OTEL_ENABLED: "false"
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/q/health", "||", "exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - "9090:9090"
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-    ports:
-      - "3000:3000"
-    depends_on:
-      - prometheus
+      retries: 10
 
