@@ -4,6 +4,30 @@ This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
 If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
 
+## Security
+
+This application uses Keycloak for authentication and authorization with role-based access control (RBAC).
+
+**Quick Start with Security:**
+
+```bash
+# Start Keycloak
+docker-compose up -d keycloak
+
+# Wait for Keycloak to be ready (check logs)
+docker logs -f keycloak
+
+# Run the application
+./mvnw quarkus:dev
+```
+
+**Test users:**
+- Admin: `admin` / `admin123` (full access)
+- Analista: `analista` / `analista123` (read access to reports)
+- Cliente: `cliente` / `cliente123` (restricted to own resources)
+
+For complete security documentation, see [SECURITY.md](SECURITY.md).
+
 ## Running the application in dev mode
 
 You can run your application in dev mode that enables live coding using:
