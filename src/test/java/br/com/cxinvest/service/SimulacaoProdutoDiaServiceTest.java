@@ -33,7 +33,7 @@ public class SimulacaoProdutoDiaServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("Produto X", result.get(0).produtoNome());
+        assertEquals("Produto X", result.get(0).produto());
         verify(repository, times(1)).produtoDiaInfo(0, 5);
     }
 
@@ -50,4 +50,3 @@ public class SimulacaoProdutoDiaServiceTest {
         verify(repository, times(1)).produtoDiaInfo(0, 10);
     }
 }
-

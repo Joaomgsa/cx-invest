@@ -2,6 +2,7 @@ package br.com.cxinvest.service;
 
 import br.com.cxinvest.dto.perfil.PerfilRiscoResponse;
 import br.com.cxinvest.entity.Cliente;
+import br.com.cxinvest.exception.ApiException;
 import br.com.cxinvest.repository.ClienteRepository;
 import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.entity.Enum.FrequenciaInvestimento;
@@ -9,7 +10,6 @@ import br.com.cxinvest.entity.Enum.PreferenciaInvestimento;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
@@ -77,7 +77,7 @@ public class ClienteService {
         cliente.perfilInvestimento = Optional.ofNullable(cliente.perfilInvestimento)
                 .map(p -> Optional.ofNullable(p.id)
                         .flatMap(perfilRepository::findByIdOptional)
-                        .orElseThrow(() -> new NotFoundException("Perfil não encontrado: " + p.id)))
+                        .orElseThrow(() -> new ApiException(404, "Perfil não encontrado: " + p.id)))
                 .orElseGet(() -> perfilService.definirPerfilCliente(total, frequencia, preferencia));
 
 
@@ -101,7 +101,7 @@ public class ClienteService {
     public Cliente atualizar(Long id, Cliente clienteAtualizado) {
         Cliente existente = repository.findById(id);
         if (existente == null) {
-            throw new NotFoundException("Cliente não encontrado: " + id);
+            throw new ApiException(404, "Cliente não encontrado: " + id);
         }
 
         // Atualiza apenas campos presentes (evita múltiplos ifs)
@@ -115,7 +115,7 @@ public class ClienteService {
         var novoPerfil = Optional.ofNullable(clienteAtualizado.perfilInvestimento)
                 .map(p -> Optional.ofNullable(p.id)
                         .flatMap(perfilRepository::findByIdOptional)
-                        .orElseThrow(() -> new NotFoundException("Perfil não encontrado: " + p.id)))
+                        .orElseThrow(() -> new ApiException(404, "Perfil não encontrado: " + p.id)))
                 .orElseGet(() -> perfilService.definirPerfilCliente(existente.totalInvestido, existente.frequenciaInvestimento, existente.preferenciaInvestimento));
 
         var existentePerfilId = Optional.ofNullable(existente.perfilInvestimento).map(p -> p.id).orElse(null);
@@ -140,7 +140,7 @@ public class ClienteService {
     public void remover(Long id) {
         Cliente existente = repository.findById(id);
         if (existente == null) {
-            throw new NotFoundException("Cliente não encontrado: " + id);
+            throw new ApiException(404, "Cliente não encontrado: " + id);
         }
         repository.removeById(id);
     }
@@ -148,12 +148,12 @@ public class ClienteService {
 
     /**
      * Obtém o perfil de risco de um cliente pelo seu ID.
-     * @param cliente_id
+     * @param clienteId identificador do cliente
      * @return PerfilRiscoResponse com as informações do perfil de risco
      */
 
-    public PerfilRiscoResponse perfilRiscoCliente(Long cliente_id){
-        return repository.buscarPerfilRisco(cliente_id)
-                .orElseThrow(() -> new NotFoundException("Cliente não encontrado: " + cliente_id));
+    public PerfilRiscoResponse perfilRiscoCliente(Long clienteId){
+        return repository.buscarPerfilRisco(clienteId)
+                .orElseThrow(() -> new ApiException(404, "Cliente não encontrado: " + clienteId));
     }
 }
