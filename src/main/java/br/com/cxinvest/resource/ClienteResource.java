@@ -3,7 +3,6 @@ package br.com.cxinvest.resource;
 import br.com.cxinvest.dto.cliente.ClienteRequest;
 import br.com.cxinvest.dto.cliente.ClienteResponse;
 import br.com.cxinvest.entity.Cliente;
-import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.service.ClienteService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -26,7 +25,7 @@ public class ClienteResource {
     @GET
     @RolesAllowed({"admin", "analista"})
     public List<ClienteResponse> listar() {
-        return service.listarTodos().stream().map(this::toResponse).collect(Collectors.toList());
+        return service.listarTodos().stream().map(service::toResponse).collect(Collectors.toList());
     }
 
     @GET
@@ -34,25 +33,25 @@ public class ClienteResource {
     @RolesAllowed({"admin", "analista", "cliente"})
     public Response buscar(@PathParam("id") Long id) {
         Optional<Cliente> cliente = service.buscarPorId(id);
-        return cliente.map(c -> Response.ok(toResponse(c)).build())
+        return cliente.map(c -> Response.ok(service.toResponse(c)).build())
                 .orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @POST
     @RolesAllowed("admin")
     public Response criar(ClienteRequest req) {
-        Cliente cliente = toEntity(req);
+        Cliente cliente = service.toEntity(req);
         Cliente criado = service.criar(cliente);
-        return Response.created(URI.create("/clientes/" + criado.id)).entity(toResponse(criado)).build();
+        return Response.created(URI.create("/clientes/" + criado.id)).entity(service.toResponse(criado)).build();
     }
 
     @PUT
     @Path("{id}")
     @RolesAllowed({"admin", "cliente"})
     public Response atualizar(@PathParam("id") Long id, ClienteRequest req) {
-        Cliente cliente = toEntity(req);
+        Cliente cliente = service.toEntity(req);
         Cliente atualizado = service.atualizar(id, cliente);
-        return Response.ok(toResponse(atualizado)).build();
+        return Response.ok(service.toResponse(atualizado)).build();
     }
 
     @DELETE
@@ -61,24 +60,5 @@ public class ClienteResource {
     public Response remover(@PathParam("id") Long id) {
         service.remover(id);
         return Response.noContent().build();
-    }
-
-    private ClienteResponse toResponse(Cliente c) {
-        Long perfilId = c.perfilInvestimento != null ? c.perfilInvestimento.id : null;
-        String perfilNome = c.perfilInvestimento != null ? c.perfilInvestimento.nome : null;
-        return new ClienteResponse(c.id, c.nome, c.email, perfilId, perfilNome, c.totalInvestido, c.frequenciaInvestimento, c.preferenciaInvestimento);
-    }
-
-    private Cliente toEntity(ClienteRequest r) {
-        Cliente c = new Cliente();
-        c.nome = r.nome();
-        c.email = r.email();
-        c.totalInvestido = r.totalInvestido();
-        c.frequenciaInvestimento = r.frequenciaInvestimento();
-        c.preferenciaInvestimento = r.preferenciaInvestimento();
-        Perfil perfil = new Perfil();
-        perfil.id = r.perfilId();
-        c.perfilInvestimento = perfil;
-        return c;
     }
 }

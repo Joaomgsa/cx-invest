@@ -7,6 +7,8 @@ import br.com.cxinvest.repository.ClienteRepository;
 import br.com.cxinvest.repository.PerfilRepository;
 import br.com.cxinvest.entity.Enum.FrequenciaInvestimento;
 import br.com.cxinvest.entity.Enum.PreferenciaInvestimento;
+import br.com.cxinvest.dto.cliente.ClienteRequest;
+import br.com.cxinvest.dto.cliente.ClienteResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -174,4 +176,31 @@ public class ClienteService {
         return repository.buscarPerfilRisco(clienteId)
                 .orElseThrow(() -> new ApiException(404, "Cliente não encontrado: " + clienteId));
     }
+
+    /**
+     * Converte um DTO ClienteRequest para a entidade Cliente.
+     * Este método centraliza a lógica de mapeamento usada pelos recursos REST.
+     */
+    public Cliente toEntity(ClienteRequest r) {
+        Cliente c = new Cliente();
+        c.nome = r.nome();
+        c.email = r.email();
+        c.totalInvestido = r.totalInvestido();
+        c.frequenciaInvestimento = r.frequenciaInvestimento();
+        c.preferenciaInvestimento = r.preferenciaInvestimento();
+        br.com.cxinvest.entity.Perfil perfil = new br.com.cxinvest.entity.Perfil();
+        perfil.id = r.perfilId();
+        c.perfilInvestimento = perfil;
+        return c;
+    }
+
+    /**
+     * Converte a entidade Cliente para ClienteResponse DTO.
+     */
+    public ClienteResponse toResponse(Cliente c) {
+        Long perfilId = c.perfilInvestimento != null ? c.perfilInvestimento.id : null;
+        String perfilNome = c.perfilInvestimento != null ? c.perfilInvestimento.nome : null;
+        return new ClienteResponse(c.id, c.nome, c.email, perfilId, perfilNome, c.totalInvestido, c.frequenciaInvestimento, c.preferenciaInvestimento);
+    }
+
 }

@@ -6,6 +6,7 @@ import br.com.cxinvest.dto.simulacao.SimulacaoRequest;
 import br.com.cxinvest.dto.simulacao.SimulacaoResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoProdutoResponse;
 import br.com.cxinvest.dto.simulacao.SimulacaoResultadoResponse;
+import br.com.cxinvest.entity.Perfil;
 import br.com.cxinvest.entity.Produto;
 import br.com.cxinvest.entity.Simulacao;
 import br.com.cxinvest.repository.SimulacaoRepository;
@@ -206,9 +207,9 @@ public class SimulacaoServiceImpl implements SimulacaoService {
 
     /**
      * Mapeia o perfil para um rótulo de risco (Baixo/Médio/Alto) ou retorna o nome do perfil quando desconhecido.
-     * TODO: Verificar pq produto tem perfil de risco e ver se conflita com perfil de investimento
+     *
      */
-    public String determinarRisco(br.com.cxinvest.entity.Perfil perfil) {
+    public String determinarRisco(Perfil perfil) {
         String risco = "Desconhecido";
         if (perfil != null && perfil.nome != null) {
             switch (perfil.nome.toUpperCase()) {
