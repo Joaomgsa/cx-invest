@@ -127,7 +127,7 @@ public class SimulacaoServiceImpl implements SimulacaoService {
                 s.valorFinal,
                 s.prazoMeses,
                 s.rentabilidadeEfetiva,
-                s.dataSimulacao
+                s.dataSimulacao != null ? s.dataSimulacao.toString() : null
         )).toList();
     }
 

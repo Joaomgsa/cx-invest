@@ -1,10 +1,12 @@
 package br.com.cxinvest.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import br.com.cxinvest.converter.InstantAttributeConverter;
 
 @Entity
 @Table(name = "tb_simulacoes")
@@ -34,8 +36,10 @@ public class Simulacao {
     @Column(name = "prazo_meses", nullable = false)
     public Integer prazoMeses;
 
-    @Column(name = "data_simulacao", nullable = false)
-    public Instant dataSimulacao = Instant.now();
+    @CreationTimestamp
+    @Convert(converter = InstantAttributeConverter.class)
+    @Column(name = "data_simulacao", nullable = false, columnDefinition = "TEXT")
+    public Instant dataSimulacao;
 
 
 }

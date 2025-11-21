@@ -15,6 +15,6 @@ public record SimulacaoHistoricoResponse(
         BigDecimal valorFinal,
         Integer prazoMeses,
         BigDecimal rentabilidadeEfetiva,
-        Instant dataSimulacao
+        String dataSimulacao
 ) {
 }
