@@ -1,0 +1,56 @@
+# Production Application Properties Example
+# Copy this file to application.properties and update with your production values
+
+# Database configuration
+quarkus.datasource.db-kind=sqlite
+quarkus.datasource.jdbc.url=jdbc:sqlite:./cx-invest.db
+quarkus.hibernate.orm.database.generation=update
+quarkus.hibernate.orm.log.sql=false
+
+# OpenTelemetry configuration
+quarkus.otel.enabled=true
+quarkus.otel.exporter.otlp.endpoint=${OTEL_ENDPOINT}
+quarkus.otel.resource.attributes.service.name=cx-invest-service
+
+# Micrometer / Prometheus
+quarkus.micrometer.enabled=true
+quarkus.micrometer.export-prometheus.enabled=true
+
+# OpenTelemetry (tracing)
+quarkus.opentelemetry.enabled=true
+quarkus.opentelemetry.tracer.exporter=otlp
+quarkus.opentelemetry.tracer.exporter.otlp.endpoint=${OTEL_ENDPOINT}
+
+# Porta HTTP
+quarkus.http.port=${PORT:8080}
+
+# Endpoint padr�o de m�tricas do Quarkus
+quarkus.metrics.enabled=true
+quarkus.metrics.export.prometheus.path=/q/metrics
+
+# Keycloak OIDC Configuration - PRODUCTION
+quarkus.oidc.auth-server-url=${OIDC_AUTH_SERVER_URL}
+quarkus.oidc.client-id=${OIDC_CLIENT_ID}
+quarkus.oidc.credentials.secret=${OIDC_CLIENT_SECRET}
+quarkus.oidc.tls.verification=required
+
+# Security Configuration
+quarkus.http.auth.permission.authenticated.paths=/*
+quarkus.http.auth.permission.authenticated.policy=authenticated
+quarkus.http.auth.permission.public.paths=/q/*
+quarkus.http.auth.permission.public.policy=permit
+
+# Role mappings
+quarkus.oidc.roles.source=accesstoken
+
+# Logging
+quarkus.log.level=INFO
+quarkus.log.category."br.com.cxinvest".level=INFO
+
+# CORS (if needed)
+# quarkus.http.cors=true
+# quarkus.http.cors.origins=${CORS_ORIGINS}
+# quarkus.http.cors.methods=GET,POST,PUT,DELETE,OPTIONS
+# quarkus.http.cors.headers=accept,authorization,content-type,x-requested-with
+# quarkus.http.cors.exposed-headers=Content-Disposition
+# quarkus.http.cors.access-control-max-age=24H
