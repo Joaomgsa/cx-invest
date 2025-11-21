@@ -29,7 +29,7 @@ import java.time.Instant;
 public class SimulacaoServiceImpl implements SimulacaoService {
 
 
-    //TODO : Implementar a lógica real do SimulacaoService (preencher DTOs e regras de negócio).
+
     @Inject
     SimulacaoRepository repository;
 

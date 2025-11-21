@@ -69,7 +69,7 @@ public class InvestimentoService {
         }).toList();
     }
 
-    // método existente mantido para compatibilidade
+
     public List<HistoricoInvestimentoResponse> historicoInvestimentos(Long clienteId, int page, int size, boolean asc) {
         return listarHistoricoInvestimentosCliente(clienteId, page, size, asc);
     }

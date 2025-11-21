@@ -90,7 +90,7 @@ public class RequestMetricRepository implements PanacheRepository<RequestMetric>
     }
 
 
-    //TODO : Ajustar a query para o banco utilizado no projeto, falta o parse do Instant para o formato aceito pelo banco
+
     /**
      * Agrega métricas por caminho (path) no período fornecido e retorna DTOs
      * com nome (path), quantidade de chamadas e média de tempo de resposta (ms).

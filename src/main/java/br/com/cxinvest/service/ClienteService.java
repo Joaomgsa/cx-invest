@@ -93,7 +93,7 @@ public class ClienteService {
         return cliente;
     }
 
-    //TODO: Informar que o cliente pode passar o parametro totalInvestido como 0 e o sistema buscará o total investido na tabela de investimento
+    //TODO: Informar que o cliente pode passar o parametro totalInvestido como 0 e o sistema buscará o total investido na tabela de investimento - Documentar isso na API
 
     /**
      * Atualiza os dados de um cliente existente. Se o perfil for alterado,
