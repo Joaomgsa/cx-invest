@@ -13,6 +13,7 @@ import org.jboss.logging.Logger;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.math.BigDecimal;
 
 @ApplicationScoped
 public class InvestimentoService {
@@ -71,5 +72,23 @@ public class InvestimentoService {
     // método existente mantido para compatibilidade
     public List<HistoricoInvestimentoResponse> historicoInvestimentos(Long clienteId, int page, int size, boolean asc) {
         return listarHistoricoInvestimentosCliente(clienteId, page, size, asc);
+    }
+
+    /**
+     * Retorna o total investido por um cliente (soma dos registros em tb_investimentos).
+     * @param clienteId id do cliente
+     * @return total investido (BigDecimal), retorna 0 quando não houver investimentos
+     * @throws ApiException(404) quando cliente não existir
+     */
+    public BigDecimal totalInvestidoPorCliente(Long clienteId) {
+        if (Objects.isNull(clienteId)) {
+            throw new ApiException(404, "Cliente não encontrado: null");
+        }
+        var clienteOpt = clienteRepository.findByIdOptional(clienteId);
+        if (clienteOpt.isEmpty()) {
+            throw new ApiException(404, "Cliente não encontrado: " + clienteId);
+        }
+
+        return repository.totalInvestidoPorCliente(clienteId);
     }
 }

@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
+import java.math.BigDecimal;
 
 /**
  * Serviço responsável pelas operações CRUD de Cliente e pela integração
@@ -36,6 +37,9 @@ public class ClienteService {
 
     @Inject
     ClientePerfilService clientePerfilService;
+
+    @Inject
+    InvestimentoService investimentoService;
 
     /**
      * Lista todos os clientes.
@@ -89,6 +93,8 @@ public class ClienteService {
         return cliente;
     }
 
+    //TODO: Informar que o cliente pode passar o parametro totalInvestido como 0 e o sistema buscará o total investido na tabela de investimento
+
     /**
      * Atualiza os dados de um cliente existente. Se o perfil for alterado,
      * registra um histórico de decisão de perfil.
@@ -104,10 +110,20 @@ public class ClienteService {
             throw new ApiException(404, "Cliente não encontrado: " + id);
         }
 
-        // Atualiza apenas campos presentes (evita múltiplos ifs)
+
+        // Atualiza apenas campos presentes
         Optional.ofNullable(clienteAtualizado.nome).ifPresent(n -> existente.nome = n);
         Optional.ofNullable(clienteAtualizado.email).ifPresent(e -> existente.email = e);
-        Optional.ofNullable(clienteAtualizado.totalInvestido).ifPresent(t -> existente.totalInvestido = t);
+        // if totalInvestido is present and equals ZERO, fetch real total from investments
+        Optional.ofNullable(clienteAtualizado.totalInvestido).ifPresent(t -> {
+            if (BigDecimal.ZERO.compareTo(t) == 0) {
+                // buscar total investido a partir da tabela de investimentos
+                BigDecimal total = investimentoService.totalInvestidoPorCliente(id);
+                existente.totalInvestido = total != null ? total : BigDecimal.ZERO;
+            } else {
+                existente.totalInvestido = t;
+            }
+        });
         Optional.ofNullable(clienteAtualizado.frequenciaInvestimento).ifPresent(f -> existente.frequenciaInvestimento = f);
         Optional.ofNullable(clienteAtualizado.preferenciaInvestimento).ifPresent(p -> existente.preferenciaInvestimento = p);
 
