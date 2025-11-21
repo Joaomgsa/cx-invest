@@ -4,9 +4,12 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 class ClienteResourceSecurityTest {
@@ -87,22 +90,24 @@ class ClienteResourceSecurityTest {
             .statusCode(403);
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
     @TestSecurity(user = "analista", roles = "analista")
-    void testDeletarComRoleAnalistaNegado() {
+    void testDeletarComRoleAnalistaNegado(int clienteId) {
         given()
             .when()
-            .delete("/clientes/1")
+            .delete("/clientes/" + clienteId)
             .then()
             .statusCode(403);
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
     @TestSecurity(user = "cliente", roles = "cliente")
-    void testBuscarComRoleCliente() {
+    void testBuscarComRoleCliente(int clienteId) {
         given()
             .when()
-            .get("/clientes/1")
+            .get("/clientes/" + clienteId)
             .then()
             .statusCode(anyOf(is(200), is(404)));
     }
