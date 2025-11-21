@@ -66,9 +66,12 @@ public class RequestMetricRepository implements PanacheRepository<RequestMetric>
      * @return lista paginada de métricas ordenadas por timestamp
      */
     public List<RequestMetric> listarPorPeriodo(Instant inicio, Instant fim, int page, int size) {
+        long iniMillis = inicio.toEpochMilli();
+        long fimMillis = fim.toEpochMilli();
         int p = Math.max(0, page);
         int s = Math.max(1, size);
-        return find("timestamp >= ?1 and timestamp < ?2 ORDER BY timestamp", inicio, fim)
+        // compara valores numéricos (milissegundos) contra a coluna que armazena epoch millis
+        return find("timestamp >= ?1 and timestamp < ?2 ORDER BY timestamp", iniMillis, fimMillis)
                 .page(Page.of(p, s))
                 .list();
     }
@@ -81,7 +84,9 @@ public class RequestMetricRepository implements PanacheRepository<RequestMetric>
      * @return número de métricas no intervalo
      */
     public long contarPorPeriodo(Instant inicio, Instant fim) {
-        return count("timestamp >= ?1 and timestamp < ?2", inicio, fim);
+        long iniMillis = inicio.toEpochMilli();
+        long fimMillis = fim.toEpochMilli();
+        return count("timestamp >= ?1 and timestamp < ?2", iniMillis, fimMillis);
     }
 
 
@@ -97,11 +102,12 @@ public class RequestMetricRepository implements PanacheRepository<RequestMetric>
      * @return lista de DTOs agregados
      */
     public List<ServicoTelemetriaResponse> listarAgregadoPorPeriodo(Instant inicio, Instant fim, int page, int size) {
+        long iniMillis = inicio.toEpochMilli();
+        long fimMillis = fim.toEpochMilli();
         int p = Math.max(0, page);
         int s = Math.max(1, size);
         int offset = p * s;
 
-        // order by quantidade desc (mais chamadas primeiro), tie-breaker por path
         String sql = "SELECT path, COUNT(*) AS quantidade, AVG(response_time_ms) AS media " +
                 "FROM request_metrics " +
                 "WHERE timestamp >= :ini AND timestamp < :fim " +
@@ -109,8 +115,8 @@ public class RequestMetricRepository implements PanacheRepository<RequestMetric>
                 "ORDER BY quantidade DESC, path";
 
         Query q = getEntityManager().createNativeQuery(sql);
-        q.setParameter("ini", inicio.toString());
-        q.setParameter("fim", fim.toString());
+        q.setParameter("ini", iniMillis);
+        q.setParameter("fim", fimMillis);
         q.setMaxResults(s);
         q.setFirstResult(offset);
 
@@ -122,11 +128,8 @@ public class RequestMetricRepository implements PanacheRepository<RequestMetric>
             int quantidade = r[1] instanceof Number ? ((Number) r[1]).intValue() : Integer.parseInt(r[1].toString());
             int media = 0;
             if (r.length > 2 && r[2] != null) {
-                if (r[2] instanceof Number) {
-                    media = ((Number) r[2]).intValue();
-                } else {
-                    media = (int) Math.round(Double.parseDouble(r[2].toString()));
-                }
+                media = r[2] instanceof Number ? ((Number) r[2]).intValue()
+                        : (int) Math.round(Double.parseDouble(r[2].toString()));
             }
             result.add(new ServicoTelemetriaResponse(nome, quantidade, media));
         }
