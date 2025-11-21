@@ -1,4 +1,6 @@
-version: "3.8"
+# Compose file para desenvolvimento com todos os serviços (infra + quarkus em devmode + otel collector)
+# Use: docker compose -f docker-compose.full-dev.yml up --build
+
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:23.0.0
@@ -7,9 +9,7 @@ services:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
       - KC_DB=dev-file
-    command:
-      - start-dev
-      - --import-realm
+    command: ["start-dev", "--import-realm"]
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
     ports:
@@ -43,43 +43,6 @@ services:
     depends_on:
       - prometheus
 
-  quarkus:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: quarkus-app
-    environment:
-      - QUARKUS_HTTP_PORT=8080
-      - QUARKUS_PROFILE=dev
-      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:sqlite:/data/quarkus.db
-      - QUARKUS_DATASOURCE_DB_KIND=sqlite
-      - JAVA_OPTS=-Dquarkus.http.port=8080
-      - MAVEN_OPTS=-Dquarkus.opentelemetry.traces.exporter=otlp -Dquarkus.opentelemetry.traces.endpoint=http://otel-collector:4318
-      - JAVA_TOOL_OPTIONS=-Dquarkus.opentelemetry.traces.exporter=otlp -Dquarkus.opentelemetry.traces.endpoint=http://otel-collector:4318
-      - QUARKUS_OPENTELEMETRY_TRACES_EXPORTER=otlp
-      - QUARKUS_OPENTELEMETRY_TRACES_ENDPOINT=http://otel-collector:4318
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
-      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=quarkus-app
-    volumes:
-      - ./:/workspace:cached
-      - ~/.m2:/root/.m2
-      - ./quarkus/data:/data
-      - ./quarkus/imports.sql:/data/imports.sql:ro
-    ports:
-      - "8081:8080"
-    command: sh -c "chmod +x /workspace/mvnw || true; cd /workspace && QUARKUS_OPENTELEMETRY_TRACES_EXPORTER=otlp QUARKUS_OPENTELEMETRY_TRACES_ENDPOINT=http://otel-collector:4318 JAVA_TOOL_OPTIONS='-Dquarkus.opentelemetry.traces.exporter=otlp -Dquarkus.opentelemetry.traces.endpoint=http://otel-collector:4318' ./mvnw quarkus:dev -Dquarkus.http.host=0.0.0.0 -Dquarkus.live-reload.polling=true || mvn -f pom.xml -Dquarkus.opentelemetry.traces.exporter=otlp -Dquarkus.opentelemetry.traces.endpoint=http://otel-collector:4318 quarkus:dev -Dquarkus.http.host=0.0.0.0 -Dquarkus.live-reload.polling=true"
-    depends_on:
-      - keycloak
-      - prometheus
-      - otel-collector
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health/ready" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: otel-collector
@@ -90,10 +53,42 @@ services:
       - "4317:4317"   # OTLP gRPC
       - "4318:4318"   # OTLP HTTP
     restart: unless-stopped
-    networks:
-      - default
 
+  quarkus-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: quarkus-dev
+    environment:
+      - QUARKUS_HTTP_PORT=8080
+      - QUARKUS_PROFILE=dev
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:sqlite:/data/quarkus.db
+      - QUARKUS_DATASOURCE_DB_KIND=sqlite
+      - JAVA_OPTS=-Dquarkus.http.port=8080
+      - QUARKUS_OPENTELEMETRY_TRACES_EXPORTER=otlp
+      - QUARKUS_OPENTELEMETRY_TRACES_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=quarkus-dev
+    volumes:
+      - ./:/workspace:delegated
+      - ~/.m2:/root/.m2
+      - ./quarkus/data:/data
+      - ./quarkus/imports.sql:/data/imports.sql:ro
+    ports:
+      - "8081:8080"  # host:container (ajuste se a porta estiver em uso)
+      - "5005:5005"  # debug
+    command: sh -c "chmod +x /workspace/mvnw || true; cd /workspace && QUARKUS_OPENTELEMETRY_TRACES_EXPORTER=otlp QUARKUS_OPENTELEMETRY_TRACES_ENDPOINT=http://otel-collector:4318 JAVA_TOOL_OPTIONS='-Dquarkus.opentelemetry.traces.exporter=otlp -Dquarkus.opentelemetry.traces.endpoint=http://otel-collector:4318' ./mvnw quarkus:dev -Dquarkus.http.host=0.0.0.0 -Dquarkus.live-reload.polling=true || mvn -f pom.xml -Dquarkus.opentelemetry.traces.exporter=otlp -Dquarkus.opentelemetry.traces.endpoint=http://otel-collector:4318 quarkus:dev -Dquarkus.http.host=0.0.0.0 -Dquarkus.live-reload.polling=true"
+    depends_on:
+      - keycloak
+      - prometheus
+      - otel-collector
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-networks:
-  default:
-    name: cxinvest_default
+# sem networks explícitas — o compose criará a rede default automaticamente
+
