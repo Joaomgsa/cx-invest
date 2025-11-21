@@ -1,0 +1,11 @@
+# dockerfile
+FROM maven:3.9.6-eclipse-temurin-21
+WORKDIR /workspace
+
+# copia apenas o wrapper/pom para acelerar cache (opcional)
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+RUN chmod +x mvnw || true
+
+# padrão: se houver volume montado, o código vindo do host será usado
+CMD ["./mvnw", "quarkus:dev", "-Dquarkus.http.host=0.0.0.0", "-Dquarkus.http.port=8080", "-Dquarkus.live-reload.polling=true"]

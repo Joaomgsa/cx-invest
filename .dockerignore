@@ -1,5 +1,18 @@
-*
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+target
+.git
+.gitignore
+.vscode
+.idea
+node_modules
+*.log
+**/src/test
+**/*.iml
+.DS_Store
+/.mvn/wrapper/maven-wrapper.jar
+
+# do not copy local environment files
+.env
+coverage
+
+# quarkus dev artifacts
+.quarkus
