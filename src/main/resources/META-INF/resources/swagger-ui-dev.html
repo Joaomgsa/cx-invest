@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <title>Swagger UI (dev - admin)</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4/swagger-ui.css"/>
+  <style>html { box-sizing: border-box; } *, *:before, *:after { box-sizing: inherit; }</style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js"></script>
+  <script>
+    const ui = SwaggerUIBundle({
+      url: "/openapi", // Quarkus OpenAPI endpoint (ajuste se necessário)
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis],
+      layout: "BaseLayout",
+      requestInterceptor: (req) => {
+        // injeta header que o filtro dev usa para autenticar como admin
+        req.headers['X-DEV-ADMIN'] = 'true';
+        return req;
+      }
+    });
+    window.ui = ui;
+  </script>
+</body>
+</html>
+

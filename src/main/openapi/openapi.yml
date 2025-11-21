@@ -1,42 +1,306 @@
 openapi: 3.0.3
 info:
-  title: Generated API
+  title: CX Invest API
   version: "1.0"
 paths:
-  /fruits:
+  /clientes:
     get:
+      summary: Listar clientes
+      description: Retorna a lista de clientes (visível para roles admin e analista).
       responses:
-        200:
-          description: OK
+        '200':
+          description: Lista de clientes
           content:
-            application/json: { }
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClienteResponse'
     post:
+      summary: Criar cliente
+      description: Cria um novo cliente (role admin). Exemplo de request baseado em import.sql.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Fruit'
+              $ref: '#/components/schemas/ClienteRequest'
+            example:
+              nome: "Ana Silva"
+              email: "ana.silva@example.com"
+              perfilId: 1
+              totalInvestido: 1000.00
+              frequenciaInvestimento: "BAIXA"
+              preferenciaInvestimento: "LIQUIDEZ"
       responses:
-        200:
-          description: OK
+        '201':
+          description: Cliente criado
           content:
-            application/json: { }
-    delete:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+  /clientes/{id}:
+    get:
+      summary: Buscar cliente por id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '404':
+          description: Cliente não encontrado
+    put:
+      summary: Atualizar cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Fruit'
+              $ref: '#/components/schemas/ClienteRequest'
       responses:
-        200:
-          description: OK
+        '200':
+          description: Cliente atualizado
+  /produtos:
+    get:
+      summary: Listar produtos
+      responses:
+        '200':
+          description: Lista de produtos
           content:
-            application/json: { }
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProdutoResponse'
+  /produtos/{id}:
+    get:
+      summary: Buscar produto por id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Produto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProdutoResponse'
+        '404':
+          description: Produto não encontrado
+  /produtos-recomendados/{perfilNome}:
+    get:
+      summary: Produtos recomendados por nome de perfil
+      description: Retorna produtos cujo perfilInvestimento.nome corresponde ao parâmetro (case-insensitive).
+      parameters:
+        - name: perfilNome
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de produtos recomendados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProdutoRecomendadoResponse'
+  /simulacoes/simular-investimento:
+    post:
+      summary: Simular investimento
+      description: Executa uma simulação de investimento para um cliente e tipo de produto.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulacaoRequest'
+            example:
+              clienteId: 1
+              valor: 1000.00
+              prazoMeses: 12
+              tipoProduto: "CDB"
+      responses:
+        '200':
+          description: Resultado da simulação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulacaoResponse'
+  /telemetria:
+    get:
+      summary: Telemetria agregada
+      description: Retorna telemetria agregada por path no período informado. Se nenhum período for informado, usa o período padrão (import.sql contém dados de exemplo em outubro/2025).
+      parameters:
+        - name: inicio
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: fim
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Telemetria agregada por serviço/path
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetriaResponse'
 components:
   schemas:
-    Fruit:
+    ClienteRequest:
+      type: object
       properties:
-        description:
+        nome:
           type: string
-        name:
+        email:
           type: string
+        perfilId:
+          type: integer
+        totalInvestido:
+          type: number
+        frequenciaInvestimento:
+          type: string
+        preferenciaInvestimento:
+          type: string
+    ClienteResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        email:
+          type: string
+        perfilId:
+          type: integer
+        perfilNome:
+          type: string
+        totalInvestido:
+          type: number
+        frequenciaInvestimento:
+          type: string
+        preferenciaInvestimento:
+          type: string
+    ProdutoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        tipo:
+          type: string
+        rentabilidadeMensal:
+          type: number
+        perfilId:
+          type: integer
+    ProdutoRecomendadoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        tipo:
+          type: string
+        rentabilidade:
+          type: number
+        risco:
+          type: string
+    SimulacaoRequest:
+      type: object
+      properties:
+        clienteId:
+          type: integer
+        valor:
+          type: number
+        prazoMeses:
+          type: integer
+        tipoProduto:
+          type: string
+    SimulacaoProdutoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        tipo:
+          type: string
+        rentabilidadeMensal:
+          type: number
+        risco:
+          type: string
+    SimulacaoResultadoResponse:
+      type: object
+      properties:
+        valorFinal:
+          type: number
+        rentabilidadeEfetiva:
+          type: number
+        prazoMeses:
+          type: integer
+    SimulacaoResponse:
+      type: object
+      properties:
+        produtoValidado:
+          $ref: '#/components/schemas/SimulacaoProdutoResponse'
+        resultadoSimulacao:
+          $ref: '#/components/schemas/SimulacaoResultadoResponse'
+        dataSimulacao:
+          type: string
+    TelemetriaResponse:
+      type: object
+      properties:
+        servicos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServicoTelemetriaResponse'
+        periodo:
+          type: object
+          properties:
+            inicio:
+              type: string
+            fim:
+              type: string
+    ServicoTelemetriaResponse:
+      type: object
+      properties:
+        nome:
+          type: string
+        quantidade:
+          type: integer
+        media:
+          type: integer
