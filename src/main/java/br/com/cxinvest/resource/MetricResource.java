@@ -1,13 +1,11 @@
 package br.com.cxinvest.resource;
 
 import br.com.cxinvest.dto.telemetria.TelemetriaResponse;
-import br.com.cxinvest.service.TelemetriaService;
+import br.com.cxinvest.service.MetricsService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import java.time.LocalDate;
 
 @Path("/telemetria")
 @Produces(MediaType.APPLICATION_JSON)
@@ -15,7 +13,7 @@ import java.time.LocalDate;
 public class MetricResource {
 
     @Inject
-    TelemetriaService telemetriaService;
+    MetricsService service;
 
     @GET
     public Response getTelemetria(
@@ -25,7 +23,7 @@ public class MetricResource {
             @QueryParam("size") @DefaultValue("10") int size
     ) {
 
-        TelemetriaResponse resp = telemetriaService.obterTelemetria(inicio, fim, page, size);
+        TelemetriaResponse resp = service.obterTelemetria(inicio, fim, page, size);
         return Response.ok(resp).build();
     }
 }

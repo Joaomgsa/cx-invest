@@ -45,6 +45,10 @@ public class Cliente extends PanacheEntityBase {
     @JoinColumn(name = "perfil_id", nullable = false)
     public Perfil perfilInvestimento;
 
+    // status: 'A' ativo, 'I' inativo (soft delete)
+    @Column(name = "status", nullable = false, length = 1)
+    public char status = 'A';
+
     // Método para atualizar o perfil do cliente
     public void setPerfil(Perfil novoPerfil) {
         this.perfilInvestimento = novoPerfil;

@@ -11,15 +11,15 @@ import java.util.Optional;
 public class ClienteRepository implements PanacheRepository<Cliente> {
 
     public Optional<Cliente> findByIdOptional(Long id) {
-        return find("id", id).firstResultOptional();
+        return find("id = ?1 and status = 'A'", id).firstResultOptional();
     }
 
     public List<Cliente> listAllClientes() {
-        return listAll();
+        return list("status", 'A');
     }
 
     public Optional<Cliente> findByEmail(String email) {
-        return find("email", email).firstResultOptional();
+        return find("email = ?1 and status = 'A'", email).firstResultOptional();
     }
 
     public Cliente persistCliente(Cliente cliente) {
@@ -33,7 +33,7 @@ public class ClienteRepository implements PanacheRepository<Cliente> {
 
     public Optional<PerfilRiscoResponse> buscarPerfilRisco(Long id) {
         // metodo que busca as informaçoes de perfil do cliente
-        return find("id", id).firstResultOptional()
+        return find("id = ?1 and status = 'A'", id).firstResultOptional()
                 .map(c -> {
                     if (c.perfilInvestimento == null) {
                         return new PerfilRiscoResponse(c.id, null, null, null);

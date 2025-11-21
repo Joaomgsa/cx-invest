@@ -20,20 +20,21 @@ CREATE TABLE IF NOT EXISTS tb_clientes (
   frequencia_investimento TEXT NOT NULL DEFAULT 'MEDIA',
   preferencia_investimento TEXT NOT NULL DEFAULT 'LIQUIDEZ',
   perfil_id INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'A',
   FOREIGN KEY (perfil_id) REFERENCES tb_perfil_investimento(id)
 );
 
 -- Inserir 10 clientes referenciando os perfis (1=CONSERVADOR,2=MODERADO,3=AGRESSIVO)
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (1, 'Ana Silva', 'ana.silva@example.com', 1000.00, 'BAIXA', 'LIQUIDEZ', 1);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (2, 'Bruno Costa', 'bruno.costa@example.com', 2500.50, 'MEDIA', 'RENTABILIDADE', 2);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (3, 'Carla Souza', 'carla.souza@example.com', 500.00, 'ALTA', 'RENTABILIDADE', 3);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (4, 'Daniel Pereira', 'daniel.pereira@example.com', 1500.00, 'MEDIA', 'LIQUIDEZ', 1);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (5, 'Eduarda Lima', 'eduarda.lima@example.com', 3000.75, 'ALTA', 'RENTABILIDADE', 2);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (6, 'Felipe Rocha', 'felipe.rocha@example.com', 800.00, 'BAIXA', 'LIQUIDEZ', 3);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (7, 'Gabriela Martins', 'gabriela.martins@example.com', 1200.00, 'MEDIA', 'LIQUIDEZ', 1);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (8, 'Hugo Fernandes', 'hugo.fernandes@example.com', 2200.00, 'ALTA', 'RENTABILIDADE', 2);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (9, 'Isabela Nunes', 'isabela.nunes@example.com', 400.00, 'BAIXA', 'LIQUIDEZ', 3);
-INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id) VALUES (10, 'João Oliveira', 'joao.oliveira@example.com', 1750.25, 'MEDIA', 'RENTABILIDADE', 2);
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (1, 'Ana Silva', 'ana.silva@example.com', 1000.00, 'BAIXA', 'LIQUIDEZ', 1, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (2, 'Bruno Costa', 'bruno.costa@example.com', 2500.50, 'MEDIA', 'RENTABILIDADE', 2, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (3, 'Carla Souza', 'carla.souza@example.com', 500.00, 'ALTA', 'RENTABILIDADE', 3, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (4, 'Daniel Pereira', 'daniel.pereira@example.com', 1500.00, 'MEDIA', 'LIQUIDEZ', 1, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (5, 'Eduarda Lima', 'eduarda.lima@example.com', 3000.75, 'ALTA', 'RENTABILIDADE', 2, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (6, 'Felipe Rocha', 'felipe.rocha@example.com', 800.00, 'BAIXA', 'LIQUIDEZ', 3, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (7, 'Gabriela Martins', 'gabriela.martins@example.com', 1200.00, 'MEDIA', 'LIQUIDEZ', 1, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (8, 'Hugo Fernandes', 'hugo.fernandes@example.com', 2200.00, 'ALTA', 'RENTABILIDADE', 2, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (9, 'Isabela Nunes', 'isabela.nunes@example.com', 400.00, 'BAIXA', 'LIQUIDEZ', 3, 'A');
+INSERT INTO tb_clientes (id, nome, email, total_investido, frequencia_investimento, preferencia_investimento, perfil_id, status) VALUES (10, 'João Oliveira', 'joao.oliveira@example.com', 1750.25, 'MEDIA', 'RENTABILIDADE', 2, 'A');
 
 -- Criação da tabela de produtos conforme nova especificação com referência ao perfil
 CREATE TABLE IF NOT EXISTS tb_produtos (
@@ -229,6 +230,9 @@ CREATE TABLE IF NOT EXISTS tb_telemetria_events (
   data_evento TEXT NOT NULL
 );
 
+-- Índice para acelerar consultas por período e serviço (data_evento, servico)
+CREATE INDEX IF NOT EXISTS idx_telemetria_data_servico ON tb_telemetria_events (data_evento, servico);
+
 -- Inserir eventos de telemetria de exemplo (outubro/2025)
 INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('simular-investimento', 240, '2025-10-01 10:00:00.000');
 INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('simular-investimento', 260, '2025-10-05 11:15:00.000');
@@ -241,3 +245,20 @@ INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUE
 INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('perfil-risco', 180, '2025-10-18 15:40:00.000');
 INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('perfil-risco', 185, '2025-10-25 09:05:00.000');
 INSERT INTO tb_telemetria_events (servico, tempo_resposta_ms, data_evento) VALUES ('perfil-risco', 185, '2025-10-25 09:05:00.000');
+
+-- Criação da tabela para RequestMetric (filtro de métricas de requisição)
+CREATE TABLE IF NOT EXISTS request_metrics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  path TEXT NOT NULL,
+  method TEXT NOT NULL,
+  status INTEGER NOT NULL,
+  response_time_ms INTEGER NOT NULL,
+  timestamp TEXT NOT NULL
+);
+
+
+
+-- Inserir alguns exemplos
+INSERT INTO request_metrics (path, method, status, response_time_ms, timestamp) VALUES ('/simulacao', 'POST', 200, 240, '2025-10-01T10:00:00Z');
+INSERT INTO request_metrics (path, method, status, response_time_ms, timestamp) VALUES ('/perfil-risco', 'GET', 200, 180, '2025-10-02T12:10:00Z');
+

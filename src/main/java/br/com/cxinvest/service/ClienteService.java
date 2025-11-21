@@ -158,7 +158,9 @@ public class ClienteService {
         if (existente == null) {
             throw new ApiException(404, "Cliente não encontrado: " + id);
         }
-        repository.removeById(id);
+        // soft delete: marcar como inativo
+        existente.status = 'I';
+        repository.persist(existente);
     }
 
 
