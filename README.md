@@ -96,6 +96,7 @@ Rodar a Aplicaçao em container em devmode(Docker):
 ```powershell
 # a partir do diretório do projeto
 docker compose -f docker-compose.dev.yml up --build
+```
 
 Observações
 
