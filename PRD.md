@@ -94,9 +94,4 @@ Desenvolvimento de uma API para simulação de investimentos que retorne o perfi
 - Autenticação segura usando JWT, OAuth2 ou Keycloak.
 ```
 
-Este PRD resume o conteúdo principal para desenvolvimento da aplicação web de simulação de investimentos com perfil de risco dinâmico conforme documento enviado. Caso queira, posso ajudar a formatar mais detalhes específicos.[^1]
-
-<div align="center">⁂</div>
-
-[^1]: etapa_000000000301329_13112025_183054.docx
 
