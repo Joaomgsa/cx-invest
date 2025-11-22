@@ -70,6 +70,10 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318
       - OTEL_RESOURCE_ATTRIBUTES=service.name=quarkus-dev
+      - QUARKUS_OIDC_AUTH_SERVER_URL=http://localhost:8180/realms/cx-invest
+      - QUARKUS_OIDC_CLIENT_ID=cx-invest-backend
+      - QUARKUS_OIDC_CREDENTIALS_SECRET=secret
+      - QUARKUS_OIDC_TLS_VERIFICATION=none
     volumes:
       - ./:/workspace:delegated
       - ~/.m2:/root/.m2
